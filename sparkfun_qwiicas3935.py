@@ -563,13 +563,13 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
     def __init__(self, spi, cs, baudrate=100000, debug=False):
         import adafruit_bus_device.spi_device as spi_device
         self._spi = spi_device.SPIDevice(spi, cs, baudrate=baudrate)
-        super().__init__(dbug)
+        super().__init__(debug)
 
     def _read_register(self, register):
         register = (register | 0x80) & 0xFF # Read single, bit 7 high.
         with self._spi as spi:
             spi.write(bytearray([register]))  #pylint: disable=no-member
-            result = bytearray(length)
+            result = bytearray(1)
             spi.readinto(result)              #pylint: disable=no-member
             if self._debug:
                  print("$%02X => %s" % (register, [hex(i) for i in result]))

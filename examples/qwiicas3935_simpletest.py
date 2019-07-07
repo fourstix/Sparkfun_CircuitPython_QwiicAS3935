@@ -20,9 +20,13 @@ import sparkfun_qwiicas3935
 
 # Create bus object using our board's I2C port
 i2c = busio.I2C(board.SCL, board.SDA)
-
-# Create joystick object
+# Create an as3935 library object
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
+
+# OR create a library object using the Bus SPI port
+# spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+# cs = digitalio.DigitalInOut(board.D8)
+# lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
 
 # Check if connected
 if lightning.connected:

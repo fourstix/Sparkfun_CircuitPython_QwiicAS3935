@@ -10,7 +10,7 @@
  Elias Santistevan @ SparkFun Electronics, May, 2019
  The Qwiic AS3935 is an I2C (or SPI) controlled lightning detector.
 
- Example 3 - Tune Antenna:
+ Example 3 - Tune Antenna (SPI):
  This program uses the Qwiic AS3935 CircuitPython Library to control
  the Qwiic AS3935 Lightning detector over I2C to tune the resonance
  frequency of the antenna. The chip provides internal capacitance that
@@ -26,15 +26,10 @@ import busio
 import digitalio
 import sparkfun_qwiicas3935
 
-# Create bus object using our board's I2C port
-i2c = busio.I2C(board.SCL, board.SDA)
-
-# Create as3935 object
-lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
-# OR create library object using the Bus SPI port
-# spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-# cs = digitalio.DigitalInOut(board.D10)
-# lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
+# Create a library object using the Bus SPI port
+spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+cs = digitalio.DigitalInOut(board.D10)
+lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
 
 print('AS3935 Franklin Lightning Detector')
 

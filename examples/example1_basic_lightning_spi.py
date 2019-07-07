@@ -10,9 +10,9 @@
  Elias Santistevan @ SparkFun Electronics, May, 2019
  The Qwiic AS3935 is an I2C (or SPI) controlled lightning detector.
 
- Example 1 - Basic Lightning:
+ Example 1 - Basic Lightning (SPI):
  This program uses the Qwiic AS3935 CircuitPython Library to
- control the Qwiic AS3935 Lightning detector over I2C to listen for
+ control the Qwiic AS3935 Lightning detector over SPI to listen for
  lightning events. The lightning detector determines whether or
  not it's actual lightning, a disturber, or noise. In the case
  your environment has a lot of noise or electrical disturbances
@@ -41,15 +41,10 @@ as3935_interrupt_pin = digitalio.DigitalInOut(board.D21)
 as3935_interrupt_pin.direction = digitalio.Direction.INPUT
 as3935_interrupt_pin.pull = digitalio.Pull.DOWN
 
-# Create bus object using our board's I2C port
-i2c = busio.I2C(board.SCL, board.SDA)
-# Create as3935 object
-lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
-
-# OR create library object using the Bus SPI port
-# spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-# cs = digitalio.DigitalInOut(board.D10)
-# lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
+# Create a library object using the Bus SPI port
+spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+cs = digitalio.DigitalInOut(board.D8)
+lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs, debug=True)
 
 # define functions
 def reduce_noise():
