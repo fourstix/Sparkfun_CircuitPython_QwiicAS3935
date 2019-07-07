@@ -122,14 +122,11 @@ Usage Example
      # Create bus object using the board's I2C port
      i2c = busio.I2C(board.SCL, board.SDA)
 
-     as3935 = QwiicAS3935_I2C(i2c)  # default address is 0x4B
+     as3935 = QwiicAS3935_I2C(i2c)  # default address is 0x03
 
-     # For a different address use QwiicAS3935(i2c, address)
-     # as3935 = QwiicAS3935_I2C(i2c, 0x4A)
-
-     # OR create library object using our Bus SPI port
+     # OR create a library object using the SPI port
      # spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-     # cs = digitalio.DigitalInOut(board.D10)
+     # cs = digitalio.DigitalInOut(board.D8)
      # as3935 = QwiicAS3935_SPI(spi, cs)
 
 Contributing
