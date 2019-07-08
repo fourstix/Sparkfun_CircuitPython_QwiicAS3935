@@ -43,8 +43,12 @@ as3935_interrupt_pin.pull = digitalio.Pull.DOWN
 
 # Create a library object using the Bus SPI port
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-cs = digitalio.DigitalInOut(board.D8)
-lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs, debug=True)
+
+# Set up chip select (CE0 is labeled CS on Sparkfun Pi Hat)
+cs = digitalio.DigitalInOut(board.CE0)
+cs.direction = digitalio.Direction.OUTPUT
+
+lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
 
 # define functions
 def reduce_noise():

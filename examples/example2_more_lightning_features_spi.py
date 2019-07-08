@@ -36,7 +36,11 @@ as3935_interrupt_pin.pull = digitalio.Pull.DOWN
 
 # Create a library object using the Bus SPI port
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-cs = digitalio.DigitalInOut(board.D10)
+
+# Set up chip select (CE0 is labeled CS on Sparkfun Pi Hat)
+cs = digitalio.DigitalInOut(board.CE0)
+cs.direction = digitalio.Direction.OUTPUT
+
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
 
 print('AS3935 Franklin Lightning Detector')
@@ -54,7 +58,7 @@ else:
 
 # The lightning detector defaults to an indoor setting (less gain/sensitivity),
 # if you plan on using this outdoors uncomment the following line:
-# lightning.indoor_outdoor = lightning.OUTDOOR
+lightning.indoor_outdoor = lightning.OUTDOOR
 
 # Read the Lightning Detector Analog Front End (AFE) mode and print it out.
 afe_mode = lightning.indoor_outdoor
@@ -72,7 +76,7 @@ else:
 # Uncomment one of the lines below to turn on disturber mask on or off
 # lightning.mask_disturber = True
 # lightning.mask_disturber = False
-print('Are disturber being masked:', end = ' ')
+print('Are disturbers being masked?', end = ' ')
 if lightning.mask_disturber:
     print('Yes.')
 else:

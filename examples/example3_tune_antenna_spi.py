@@ -28,7 +28,11 @@ import sparkfun_qwiicas3935
 
 # Create a library object using the Bus SPI port
 spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-cs = digitalio.DigitalInOut(board.D10)
+
+# Set up chip select (CE0 is labeled CS on Sparkfun Pi Hat)
+cs = digitalio.DigitalInOut(board.CE0)
+cs.direction = digitalio.Direction.OUTPUT
+
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
 
 print('AS3935 Franklin Lightning Detector')

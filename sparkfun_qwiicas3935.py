@@ -560,24 +560,65 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
 
 class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
     """Driver for Sparkfun AS3935 Lightning Detector over SPI"""
-    def __init__(self, spi, cs, baudrate=100000, debug=False):
-        import adafruit_bus_device.spi_device as spi_device
-        self._spi = spi_device.SPIDevice(spi, cs, baudrate=baudrate)
+    def __init__(self, spi, cs, debug=False):
+        # We can't use SPIDevice becasue of the required cha-cha-cha
+        # on the CS line (CS=High, Low, High) after each read
+        self._spi = spi
+        # needed for managing the spi read/writes
+        self._cs  = cs
+        # set cs line high initially
+        self._cs.value = True
         super().__init__(debug)
 
     def _read_register(self, register):
-        register = (register | 0x80) & 0xFF # Read single, bit 7 high.
-        with self._spi as spi:
-            spi.write(bytearray([register]))  #pylint: disable=no-member
-            result = bytearray(1)
-            spi.readinto(result)              #pylint: disable=no-member
-            if self._debug:
-                 print("$%02X => %s" % (register, [hex(i) for i in result]))
-            return result[0]
+        # set the address read bits
+        addr = (register | _SPI_READ_MASK) & 0xFF
+        try:
+            while not self._spi.try_lock():
+                pass
 
-    def _write_regsiter(self, register, value):
-        register &= 0x7F  # Write, bit 7 low.
-        with self._spi as spi:
-            spi.write(bytes([register, value & 0xFF])) #pylint: disable=no-member
+            # configure for SPI mode 1
+            self._spi.configure(phase=1, polarity=0)
+#        self._spi.configure(baudrate=2000000, phase=1, polarity=0)
+            # start the read
+            self._cs.value = False
+            # write msb first
+            self._spi.write(bytearray([addr]))  #pylint: disable=no-member
+            # read the next byte afte writing the address
+            result = bytearray(1)
+            self._spi.readinto(result)
+            if self._debug:
+                print("$%02X => %s" % (register, [hex(i) for i in result]))
+
+            return result[0]
+        #the finally block always executes before return
+        finally:
+            # per datasheet CS = HIGH, LOW, HIGH signals the end of a read
+            self._cs.value = True
+            self._cs.value = False
+            self._cs.value = True
+            self._spi.unlock()
+
+    def _write_register(self, register, value):
+        register &= 0x3F  # Write, bit 7, 6  low.
+
+        try:
+            while not self._spi.try_lock():
+                pass
+
+            # configure for SPI mode 1
+#            self._spi.configure(baudrate=2000000, phase=1, polarity=0)
+            self._spi.configure(phase=1, polarity=0)
+            # start the write
+            self._cs.value = False
+            # write msb first
+            self._spi.write(bytearray([register, value]))  #pylint: disable=no-member
+
             if self._debug:
                 print("$%02X <= 0x%02X" % (register, value))
+
+        # the finally block always executes before return
+        finally:
+            # raise the cs line once we are done and release the spi bus
+            self._cs.value = True
+            self._spi.unlock()

@@ -73,7 +73,7 @@ else:
 # Uncomment one of the lines below to turn on disturber mask on or off
 # lightning.mask_disturber = True
 # lightning.mask_disturber = False
-print('Are disturber being masked:', end = ' ')
+print('Are disturbers being masked?', end = ' ')
 if lightning.mask_disturber:
     print('Yes.')
 else:
