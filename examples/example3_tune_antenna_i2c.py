@@ -21,7 +21,6 @@
 
 import board
 import busio
-import digitalio
 import sparkfun_qwiicas3935
 
 # Create bus object using our board's I2C port

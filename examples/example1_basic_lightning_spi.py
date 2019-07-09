@@ -57,11 +57,11 @@ def reduce_noise(value):
     # warns that smartphone and smart watch displays, DC-DC converters, and/or
     # anything that operates in 500 kHz range are noise sources to be avoided.
     # The manufacturer's default value is 2 with a maximum value of 7.
-    value += 1
+    value =+ 1
 
     if value > 7:
         print('Noise floor is at the maximum value.')
-        return
+        return 7
     print('Increasing the noise event threshold to ', value)
     lightning.noise_level = value
     return value
@@ -76,7 +76,7 @@ def increase_threshold(value):
     value += 1
     if value > 10:
         print('Watchdog threshold is at its maximum value')
-        return
+        return 10
     print('Increasing the disturber watchdog threshold to ', value)
     lightning.watchdog_threshold = value
     return value
