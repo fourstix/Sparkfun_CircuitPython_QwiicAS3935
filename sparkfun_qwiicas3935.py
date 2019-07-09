@@ -55,6 +55,7 @@ __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/fourstix/Sparkfun_CircuitPython_QwiicAS3935.git"
 
 # imports
+from abc import ABC, abstractmethod
 from time import sleep
 from micropython import const
 
@@ -103,7 +104,8 @@ _SPI_READ_MASK = const(0x40)
 _CALIB_MASK = const(0x7F)
 _DIV_MASK = const(0x3F)
 
-class Sparkfun_QwiicAS3935:
+# abstract base class
+class Sparkfun_QwiicAS3935(ABC):
     """Driver for Sparkfun AS3935 Lightning Detector"""
     # pylint: disable=too-many-instance-attributes
 
@@ -151,7 +153,7 @@ class Sparkfun_QwiicAS3935:
         # Give time for the internal oscillators to start up.
         sleep(0.002)
 
-        # According to data sheet pg 23, section 8.11, one must 
+        # According to data sheet pg 23, section 8.11, one must
         # write a 1 to reg 0x08 bit 5 wait 2ms and then write a zero
         self._write_register_bits(_FREQ_DISP_IRQ, _OSC_MASK, 1, 5)
         sleep(0.002)
@@ -161,10 +163,7 @@ class Sparkfun_QwiicAS3935:
         # Check callibration
         calibrated = self._read_byte(_CALIB_SRCO) & _CALIB_MASK
 
-        if calibrated:
-            return True
-        else:
-            return False
+        return bool(calibrated)
 
     def clear_statistics(self):
         """REG0x02, bit [6], manufacturer default: 1.
@@ -187,7 +186,7 @@ class Sparkfun_QwiicAS3935:
 
         #A 20 ms delay is added to allow for the memory register to be populated
         # after the interrupt pin goes HIGH. See "Interrupt Management" in datasheet.
-        sleep(0.020);
+        sleep(0.020)
 
         value = self._read_register(_INT_MASK_ANT)
         # Only need the first four bits [3:0]
@@ -222,12 +221,12 @@ class Sparkfun_QwiicAS3935:
         self._write_register(_DEFAULT_RESET, _DIRECT_COMMAND)
 
     def calibrate(self):
-        # Send command to calibrate the oscillators
+        """Send command to calibrate the oscillators"""
         self._write_register(_CALIB_RCO, _DIRECT_COMMAND)
         # Give time for the internal oscillators to start up.
         sleep(0.002)
 
-        # According to data sheet pg 23, section 8.11, one must 
+        # According to data sheet pg 23, section 8.11, one must
         # write a 1 to reg 0x08 bit 5 wait 2ms and then write a zero
         self._write_register_bits(_FREQ_DISP_IRQ, _OSC_MASK, 1, 5)
         sleep(0.002)
@@ -237,10 +236,7 @@ class Sparkfun_QwiicAS3935:
         # Check callibration
         calibrated = self._read_byte(_CALIB_SRCO) & _CALIB_MASK
 
-        if calibrated:
-            return True
-        else:
-            return False
+        return bool(calibrated)
 
     # properites (read-only)
 
@@ -275,7 +271,7 @@ class Sparkfun_QwiicAS3935:
     @property
     def connected(self):
         """Get the AFE setting to verify the AS3935 is connected to the bus."""
-        value = self._read_register(_AFE_GAIN);
+        value = self._read_register(_AFE_GAIN)
         value &= ~_IO_MASK
         mode = value >> 1
         return mode == self.INDOOR or mode == self.OUTDOOR
@@ -286,7 +282,7 @@ class Sparkfun_QwiicAS3935:
     def indoor_outdoor(self):
         """REG0x00, bits [5:1], manufacturer default: 10010 (INDOOR).
         This funciton changes toggles the chip's settings for Indoors and Outdoors."""
-        value = self._read_register(_AFE_GAIN);
+        value = self._read_register(_AFE_GAIN)
         value &= ~_IO_MASK
         return value >> 1
 
@@ -296,9 +292,9 @@ class Sparkfun_QwiicAS3935:
         This funciton changes the chip's settings for Indoors and Outdoors.
         Only values of either INDOOR (0x12) or OUTDOOR (OX0E) are allowed."""
         if value == self.INDOOR:
-            self._write_register_bits(_AFE_GAIN, _GAIN_MASK, self.INDOOR, 1);
-        elif value  == self.OUTDOOR:
-            self._write_register_bits(_AFE_GAIN, _GAIN_MASK, self.OUTDOOR, 1);
+            self._write_register_bits(_AFE_GAIN, _GAIN_MASK, self.INDOOR, 1)
+        elif value == self.OUTDOOR:
+            self._write_register_bits(_AFE_GAIN, _GAIN_MASK, self.OUTDOOR, 1)
         else:
             raise ValueError("Only values of either INDOOR (0x12) or OUTDOOR (OX0E) are allowed.")
 
@@ -317,7 +313,7 @@ class Sparkfun_QwiicAS3935:
         if value < 1 or value > 10:
             raise ValueError('Only sensitivity threshold values 1 to 10 allowed.')
 
-        self._write_register_bits(_THRESHOLD, _THRESH_MASK, value, 0);
+        self._write_register_bits(_THRESHOLD, _THRESH_MASK, value, 0)
 
     @property
     def noise_level(self):
@@ -394,7 +390,7 @@ class Sparkfun_QwiicAS3935:
         # bit mask 0x30
         mask = (1<<5)|(1<<4)
 
-        if value  == 1:
+        if value == 1:
             self._write_register_bits(_LIGHTNING_REG, mask, 0, 4)
         elif value == 5:
             self._write_register_bits(_LIGHTNING_REG, mask, 1, 4)
@@ -493,11 +489,22 @@ class Sparkfun_QwiicAS3935:
 
         self._write_register_bits(_FREQ_DISP_IRQ, _CAP_MASK, value, 0)
 
+    # abstract methods
+    @abstractmethod
+    def _read_register(self, register):
+        pass
 
+    @abstractmethod
+    def _read_byte(self, register):
+        pass
+
+    @abstractmethod
+    def _write_register(self, register, value):
+        pass
 
     # private functions
 
-    def _write_register_bits(self, reg, mask, bits, startPosition):
+    def _write_register_bits(self, reg, mask, bits, start_position):
         # Mask the part of the register value that coincides with the setting,
         # then write the given bits to the register at the given start position.
 
@@ -506,10 +513,11 @@ class Sparkfun_QwiicAS3935:
         # Mask the position we want to write to
         value &= (~mask)
         # Set the given bits in the variable
-        value |= (bits << startPosition)
+        value |= (bits << start_position)
         # Write the updated variable value back to the register
         self._write_register(reg, value)
 
+# concrete subclass for I2C
 class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
     """Driver for Sparkfun AS3935 Lightning Detector over I2C"""
     def __init__(self, i2c, address=DEFAULT_I2C_ADDR, debug=False):
@@ -524,7 +532,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             raise ValueError("Register value must be in the range of 0x00 to 0x08")
 
         with self._i2c as i2c:
-            i2c.write(bytes([0x00]),stop=False)
+            i2c.write(bytes([0x00]), stop=False)
             # Write to the base address, then read all data registers in a
             # single block read. Then return the desired value from the list.
             # Successive individual byte reads, tend to fail. This trick
@@ -546,7 +554,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
         # contains the lightning look-up tables and calibration registers.
         # The read_register is more efficent for more frequent data registers.
         with self._i2c as i2c:
-            i2c.write(bytes([0x00]),stop=False)
+            i2c.write(bytes([0x00]), stop=False)
             # Write to the base address, then read all data registers in a
             # single block read. Then return the desired value from the list.
             # Successive individual byte reads, tend to fail. This trick
@@ -570,7 +578,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             if self._debug:
                 print("$%02X <= 0x%02X" % (register, value))
 
-
+# concrete subclass for SPI
 class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
     """Driver for Sparkfun AS3935 Lightning Detector over SPI"""
     def __init__(self, spi, cs, debug=False):
@@ -578,7 +586,7 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
         # on the CS line (CS=High, Low, High) after each read
         self._spi = spi
         # needed for managing the spi read/writes
-        self._cs  = cs
+        self._cs = cs
         # set cs line high initially
         self._cs.value = True
         super().__init__(debug)

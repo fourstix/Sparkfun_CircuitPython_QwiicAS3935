@@ -13,7 +13,6 @@
  that status of the Qwiic AS3935 Lightning Detector.
 """
 
-from time import sleep
 import board
 import busio
 import sparkfun_qwiicas3935
@@ -44,4 +43,3 @@ elif mode == lightning.INDOOR:
     print('The Lightning Detector is in the Indoor mode.')
 else:
     print('The Lightning Detector is in an Unknown mode.')
-

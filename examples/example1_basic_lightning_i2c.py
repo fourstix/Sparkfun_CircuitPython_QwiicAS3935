@@ -25,7 +25,6 @@
  event occurs.
 """
 
-import sys
 from time import sleep
 import board
 import busio
@@ -47,37 +46,35 @@ i2c = busio.I2C(board.SCL, board.SDA)
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
 
 # define functions
-def reduce_noise():
-    global noise_floor
-    """This function helps to adjust the sensor to your environment. More
-    environmental noise leads to more false positives. If you see lots of noise
-    events, try increasing the noise threshold with this function. The datsheet
-    warns that smartphone and smart watch displays, DC-DC converters, and/or
-    anything that operates in 500 kHz range are noise sources to be avoided.
-    The manufacturer's default value is 2 with a maximum value of 7."""
-    noise_floor += 1
+def reduce_noise(value):
+    # This function helps to adjust the sensor to your environment. More
+    # environmental noise leads to more false positives. If you see lots of noise
+    # events, try increasing the noise threshold with this function. The datsheet
+    # warns that smartphone and smart watch displays, DC-DC converters, and/or
+    # anything that operates in 500 kHz range are noise sources to be avoided.
+    # The manufacturer's default value is 2 with a maximum value of 7."""
+    value += 1
 
-    if noise_floor > 7:
+    if value > 7:
         print('Noise floor is at the maximum value.')
         return
-    print('Increasing the noise event threshold to ', noise_floor)
-    lightning.noise_level = noise_floor
+    print('Increasing the noise event threshold to ', value)
+    lightning.noise_level = value
+    return value
 
+def increase_threshold(value):
+    # This function is similar to the one above in that it will increase the
+    # antenna's robustness against false positives. However, this function helps
+    # to increase the robustness against "distrubers" and not "noise". If you
+    # have a lot of disturbers trying increasing the watchdog threshold.
+    # The default value is 2 and goes up to 10.
 
-def increase_watchdog_threshold():
-    """This function is similar to the one above in that it will increase the
-    antenna's robustness against false positives. However, this function helps
-    to increase the robustness against "distrubers" and not "noise". If you
-    have a lot of disturbers trying increasing the watchdog threshold.
-    The default value is 2 and goes up to 10."""
-    global threshold
-
-    watchdog_threshold += 1
-    if watchdog_threshold > 10:
+    value += 1
+    if value > 10:
         print('Watchdog threshold is at its maximum value')
         return
-    print('Increasing the disturber watchdog threshold to ', watchdog_threshold)
-    lightning.watchdog_threshold = watchdog_threshold
+    print('Increasing the disturber watchdog threshold to ', value)
+    lightning.watchdog_threshold = value
 
 # main code
 
@@ -109,12 +106,14 @@ try:
 
             if interrupt_value == lightning.NOISE:
                 print('Noise.')
-                # uncomment line below to adjust the noise level (see function comments above)
-                # reduce_noise()
+                # uncomment line below to adjust the noise level
+                #(see function comments above)
+                # noise_floor = reduce_noise(noise_floor)
             elif interrupt_value == lightning.DISTURBER:
                 print('Disturber.')
-                # uncomment the line below to adjust the watchdog threshold (see function comments above)
-                # increase_watchdog_threshold()
+                # uncomment the line below to adjust the watchdog threshold
+                #(see function comments above)
+                # watchdog_threshold = increase_threshold(watchdog_threshold)
             elif interrupt_value == lightning.LIGHTNING:
                 print('Lightning strike detected!')
                 print('Approximately: ' + str(lightning.distance_to_storm) + 'km away!')

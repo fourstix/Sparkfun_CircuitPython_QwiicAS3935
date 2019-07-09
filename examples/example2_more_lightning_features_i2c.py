@@ -22,7 +22,6 @@
  event occurs.
 """
 
-import sys
 from time import sleep
 import board
 import busio
@@ -152,6 +151,3 @@ try:
 
 except KeyboardInterrupt:
     pass
-
-
-

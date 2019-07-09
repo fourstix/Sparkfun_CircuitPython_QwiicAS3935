@@ -19,8 +19,6 @@
  on the frequency divsior used) on the INT pin.
 """
 
-import sys
-from time import sleep
 import board
 import busio
 import digitalio
