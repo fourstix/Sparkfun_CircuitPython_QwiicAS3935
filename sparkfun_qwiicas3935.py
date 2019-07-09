@@ -518,6 +518,8 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
         super().__init__(debug)
 
     def _read_register(self, register):
+        # Read a data register in the 0x00 to 0x08 range.
+        # Use read_byte function to read registers above this range.
         if register < _AFE_GAIN or register > _FREQ_DISP_IRQ:
             raise ValueError("Register value must be in the range of 0x00 to 0x08")
 
@@ -528,9 +530,9 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             # Successive individual byte reads, tend to fail. This trick
             # was taken from pcfens/RPi-AS335 python libray on github.
             #
-            # In the original commments, pcfens says this trick is required
-            # because smbus doesn't support repeated I2C starts to read the
-            # registers directly on the sensor.
+            # In the original commments, Phil Fenstermacher (pcfens) says this
+            # trick is required because smbus doesn't support repeated I2C
+            # starts to read the registers directly (singularly) on the sensor.
             result = bytearray(9)
             i2c.readinto(result)
             if self._debug:
@@ -540,10 +542,21 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             return result[register]
 
     def _read_byte(self, register):
-        # read all the registers and get a particular byte value
+        # Read all the registers and get byte values above 0x08.  This range
+        # contains the lightning look-up tables and calibration regisers.
+        # The read_register is more efficent for more frequent data registers.
         with self._i2c as i2c:
             i2c.write(bytes([0x00]),stop=False)
-            # read all the available bytes available
+            # Write to the base address, then read all data registers in a
+            # single block read. Then return the desired value from the list.
+            # Successive individual byte reads, tend to fail. This trick
+            # was taken from pcfens/RPi-AS335 python libray on github.
+            # Note that to get to the calibration registers, we have to read
+            # 63 bytes (ranging from 0x00 to 0x3D).
+            #
+            # In the original commments, Phil Fenstermacher (pcfens) says this
+            # trick is required because smbus doesn't support repeated I2C
+            # starts to read the registers directly (singularly) on the sensor.
             result = bytearray(0x3E)
             i2c.readinto(result)
             if self._debug:
@@ -570,6 +583,7 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
         self._cs.value = True
         super().__init__(debug)
 
+
     def _read_register(self, register):
         # set the address read bits
         addr = (register | _SPI_READ_MASK) & 0xFF
@@ -578,8 +592,7 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
                 pass
 
             # configure for SPI mode 1
-            self._spi.configure(phase=1, polarity=0)
-#        self._spi.configure(baudrate=2000000, phase=1, polarity=0)
+            self._spi.configure(baudrate=2000000, phase=1, polarity=0)
             # start the read
             self._cs.value = False
             # write msb first
@@ -599,6 +612,10 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
             self._cs.value = True
             self._spi.unlock()
 
+    def _read_byte(self, register):
+        # For SPI read_byte function is same as read_register register
+        return self._read_register(register)
+
     def _write_register(self, register, value):
         register &= 0x3F  # Write, bit 7, 6  low.
 
@@ -607,8 +624,7 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
                 pass
 
             # configure for SPI mode 1
-#            self._spi.configure(baudrate=2000000, phase=1, polarity=0)
-            self._spi.configure(phase=1, polarity=0)
+            self._spi.configure(baudrate=2000000, phase=1, polarity=0)
             # start the write
             self._cs.value = False
             # write msb first
