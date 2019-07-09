@@ -8,7 +8,7 @@ Ensure your device works with this simple test.
     :linenos:
 
 Examples (I2C)
----------
+--------------
 
 1. Basic Lightning (I2C) - Show lightning events.
 
@@ -29,7 +29,7 @@ Examples (I2C)
     :linenos:
 
 Examples (SPI)
----------
+--------------
 
 1. Basic Lightning (SPI) - Show lightning events.
 
