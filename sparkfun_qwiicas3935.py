@@ -30,7 +30,7 @@ CircuitPython driver library for the Sparkfun AS3935 Lightning Detector
 
 * Based on the Arduino library for the Qwiic AS3935 Lightning Detector
 * Written by Elias Santistevan @ SparkFun Electronics in January, 2019
-* Register read function based on code written by Phil Fenstermacher
+* I2C Register read functions based on code written by Phil Fenstermacher
 * on December, 2014 as part of the RPi_AS3935 python library.
 
 Implementation Notes
@@ -543,7 +543,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
 
     def _read_byte(self, register):
         # Read all the registers and get byte values above 0x08.  This range
-        # contains the lightning look-up tables and calibration regisers.
+        # contains the lightning look-up tables and calibration registers.
         # The read_register is more efficent for more frequent data registers.
         with self._i2c as i2c:
             i2c.write(bytes([0x00]),stop=False)
