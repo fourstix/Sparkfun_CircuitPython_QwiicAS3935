@@ -486,9 +486,8 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def tune_cap(self):
-        """This setting will return the capacitance of the internal capacitors. It will
-        return a value from one to 15 multiplied by the 8pF steps of the internal
-        capacitance."""
+        """This setting will return the capacitance of the internal capacitor.
+         It will return a value from 0 to 120pF, in 8pF steps."""
         # REG0x08, bits [3:0], manufacturer default: 0.
 
         value = self._read_register(_FREQ_DISP_IRQ)
@@ -500,13 +499,16 @@ class Sparkfun_QwiicAS3935(ABC):
     @tune_cap.setter
     def tune_cap(self, value):
         """This setting will add capacitance to the series RLC antenna on the
-        product. It's possible to add 0-120pF in steps of 8pF to the antenna.
-        The Tuning Cap value must be between 0 and 15."""
+        product. It's possible to add 0-120pF in steps of  8pF to the antenna.
+        The Tuning Cap value will be set between 0 and 120pF, in steps of 8pF.
+        If necessary, the input value is rounded down to the nearest 8pF."""
         # REG0x08, bits [3:0], manufacturer default: 0.
-        if value < 0 or value > 15:
-            raise ValueError('The Tuning Cap value must be between 0 and 15.')
+        # Divide down to integer 0 - 15, rounding down
+        reg_value = value // 8
+        if reg_value < 0 or reg_value > 15:
+            raise ValueError('The Tuning Cap value must be between 0 and 120pF.')
 
-        self._write_register_bits(_FREQ_DISP_IRQ, _CAP_MASK, value, 0)
+        self._write_register_bits(_FREQ_DISP_IRQ, _CAP_MASK, reg_value, 0)
 
     # abstract methods
     @abstractmethod

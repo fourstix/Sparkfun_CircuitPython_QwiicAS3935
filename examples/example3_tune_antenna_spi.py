@@ -60,12 +60,12 @@ else:
 # 16 by default but can be 32, 64, or 128, depending on what value you set.
 print ('Division Ratio is set to: ', str(lightning.division_ratio))
 
-# Here you give a value of 0-15, which increases the capacitance on
-# the RLC circuit in steps of 8pF, up to 120pF. For example giving a
-# paramater of 2: 2 * 8pF = 16pF. # The change in frequency is very modest.
-# At 15 (max - 120pF), the frequency is around 490kHz down from 512kHz.
-# The equation for calculating frequency in an RLC circuit is:
-# f = 1/(2pi*sqrt(LC)). To change the capacitance, uncomment the line below.
+# Here you can set a value of 0-120, which increases the capacitance on
+# the RLC circuit in steps of 8pF, up to 120pF. The change in frequency is
+# very modest. At 15 (max - 120pF), the frequency is around 490kHz down from
+# 512kHz. The equation for calculating frequency in an RLC circuit is:
+# f = 1/(2pi*sqrt(LC))
+# To change the capacitance, uncomment the line below.
 # lightning.tune_cap = 0
 
 # When reading the internal capcitor value, it will return the value in pF.
