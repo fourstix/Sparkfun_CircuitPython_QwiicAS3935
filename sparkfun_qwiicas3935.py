@@ -359,8 +359,8 @@ class Sparkfun_QwiicAS3935(ABC):
         """This setting, like the watchdog threshold, can help determine
         between false events and actual lightning. The shape of the spike is
         analyzed during the chip's signal validation routine. Increasing this
-         value increases robustness at the cost of sensitivity to distant
-         events. The Spike rejection value must be from 1 to 11."""
+        value increases robustness at the cost of sensitivity to distant
+        events. The Spike rejection value must be from 1 to 11."""
         # REG0x02, bits [3:0], manufacturer default: 0010 (2).
         if value < 1 or value > 11:
             raise ValueError("Spike rejection value must be from 1 to 11.")
@@ -371,7 +371,7 @@ class Sparkfun_QwiicAS3935(ABC):
     def lightning_threshold(self):
         """This function will return the number of lightning strikes must
         strike within a 15 minute window before it triggers an event on the
-         IRQ pin. Default is 1."""
+        IRQ pin. Default is 1."""
         # REG0x02, bits [5:4], manufacturer default: 0 (single strike).
         value = self._read_register(_LIGHTNING_REG)
         value &= ~_LIGHT_MASK
@@ -422,7 +422,7 @@ class Sparkfun_QwiicAS3935(ABC):
     @mask_disturber.setter
     def mask_disturber(self, value):
         """Setting this True or False will change whether or not disturbers
-         trigger the IRQ pin."""
+        trigger the IRQ pin."""
         # REG0x03, bit [5], manufacturere default: 0.
         # bit mask 0x10
         mask = 1<<5
@@ -459,7 +459,7 @@ class Sparkfun_QwiicAS3935(ABC):
         """The antenna is designed to resonate at 500kHz and so can be tuned
         with the following setting. The accuracy of the antenna must be within
         3.5 percent of that value for proper signal validation and distance
-         estimation. The division ratio can only be set to 16, 32, 64 or 128."""
+        estimation. The division ratio can only be set to 16, 32, 64 or 128."""
         # REG0x03, bit [7:6], manufacturer default: 0 (16 division ratio).
         # bit mask 0xC0
         mask = (1<<7)|(1<<6)
@@ -491,7 +491,7 @@ class Sparkfun_QwiicAS3935(ABC):
     @tune_cap.setter
     def tune_cap(self, value):
         """This setting will add capacitance to the series RLC antenna on the
-         product. It's possible to add 0-120pF in steps of 8pF to the antenna.
+        product. It's possible to add 0-120pF in steps of 8pF to the antenna.
         The Tuning Cap value must be between 0 and 15."""
         # REG0x08, bits [3:0], manufacturer default: 0.
         if value < 0 or value > 15:
