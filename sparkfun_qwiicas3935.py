@@ -107,7 +107,9 @@ _DIV_MASK = const(0x3F)
 
 # abstract base class
 class Sparkfun_QwiicAS3935(ABC):
-    """Abstract base class for Sparkfun AS3935 Lightning Detector"""
+    """Abstract base class for Sparkfun AS3935 Lightning Detector.
+    Use the appropriate driver subclass Sprarkfun_QwiicAS3935_I2C() for I2C
+    or Sparkfun_QwiicAS3935_SPI() for SPI."""
     # pylint: disable=too-many-instance-attributes
 
     # class constants
@@ -126,25 +128,25 @@ class Sparkfun_QwiicAS3935(ABC):
 
     # Antenna frequency
     ANTENNA_FREQ = const(0x03)
-    """Select the Antenna oscillator frequency"""
+    """Display the antenna oscillator frequency on the INT line."""
 
     def __init__(self, debug=False):
         self._debug = debug
 
     def power_down(self):
-        """Thid breakout board consumes 1-2uA while powered down. If the board
-        is powered down then the TRCO will need to be recalibrated by calling
-        the wake up function. SPI and I2-C remain active when the chip is
-        powered down."""
+        """This breakout board consumes 1-2uA while powered down. If the board
+        is powered down, then the TRCO must be recalibrated by calling the
+        wake_up() function. Note that SPI and I2C remain active when the chip
+        is powered down."""
         #REG0x00, bit[0], manufacturer default: 0.
         self._write_register_bits(_AFE_GAIN, _POWER_MASK, 1, 0)
 
     def wake_up(self):
-        """ The following function wakes the Lightning Detector after power
+        """The following function wakes the Lightning Detector after a power
         down. The timer RC oscillator (TRCO) needs to be recalibrated after
-        power down. This function sends the Direct Command to the CALIB_RCO
-        register 0x3D waits a bit and then checks that it has been successfully
-        calibrated. Note that SPI and I2C are active during power down."""
+        power down. This function sends a command to the CALIB_RCO register,
+        waits a bit and then checks that it has been successfully calibrated.
+        Note that SPI and I2C remain active during power down."""
 
         # Set the power down bit to zero to wake it up
         self._write_register_bits(_AFE_GAIN, _POWER_MASK, 0, 0)
@@ -166,8 +168,8 @@ class Sparkfun_QwiicAS3935(ABC):
         return bool(calibrated)
 
     def clear_statistics(self):
-        """This register clears the number of lightning strikes that has been
-         read in the last 15 minute block."""
+        """Clear the number of lightning strikes that has been read in the
+        last 15 minutes."""
         # REG0x02, bit [6], manufacturer default: 1.
         mask = 1 << 6
         # Write high, then low, then high to clear.
@@ -177,13 +179,13 @@ class Sparkfun_QwiicAS3935(ABC):
 
     def read_interrupt_register(self):
         """When there is an event that exceeds the watchdog threshold, the
-        register is written with the type of event. This consists of two
-        messages: INT_D (disturber detected) and INT_L (Lightning detected).
-        A third interrupt INT_NH (noise level too HIGH) indicates that the
-        noise level has been exceeded and will persist until the noise has
-        ended. Events are active HIGH. There is a one second window of time to
-        read the interrupt register after lightning is detected, and 1.5
-        seconds after disturber."""
+        interrupt register is written with the type of event. There are two
+        event detected interrupt values, DISTURBER (disturber detected) or
+        LIGHTNING (lightning detected).  A third interrupt value NOISE (noise
+        too high) indicates that the noise level has been exceeded and will
+        persist until the noise has ended. Interrupts are active HIGH. There
+        is a one second window of time to read the interrupt register after
+        lightning is detected, and 1.5 seconds after disturber."""
         # REG0x03, bits [3:0], manufacturer default: 0.
 
         #A 20 ms delay is added to allow for the memory register to be populated
@@ -197,12 +199,17 @@ class Sparkfun_QwiicAS3935(ABC):
 
     def display_oscillator(self, state, osc):
         """This will send the frequency of the oscillators to the IRQ pin.
-        osc 1, bit[5] = TRCO - Timer RCO Oscillators 1.1MHz
-        osc 2, bit[6] = SRCO - System RCO at 32.768kHz
-        osc 3, bit[7] = LCO - Frequency of the Antenna
-        State is True/False for on/off and
-        Oscillator value must be between 1 and 3"""
+        State is True/False for on/off
+        Use value osc = ANTENNA_FREQ (3) to display the Antenna frequency for
+        tuning.  Oscilator value must be between 1 and 3.
+        Other oscilator frequenciess are available as well:
+        osc = 1, TRCO - Timer RCO Oscillators 1.1MHz
+        osc = 2, SRCO - System RCO at 32.768kHz
+        osc = 3, LCO  - Frequency of the Antenna""""
         # REG0x08, bits [5,6,7], manufacturer default: 0.
+        # osc 1, bit[5] = TRCO - Timer RCO Oscillators 1.1MHz
+        # osc 2, bit[6] = SRCO - System RCO at 32.768kHz
+        # osc 3, bit[7] = LCO - Frequency of the Antenna
         # Check the state to turn on or off
         if state:
             value = 1
@@ -531,7 +538,7 @@ class Sparkfun_QwiicAS3935(ABC):
 
 # concrete subclass for I2C
 class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
-    """Driver for Sparkfun AS3935 Lightning Detector over I2C"""
+    """Driver subclass for Sparkfun AS3935 Lightning Detector over I2C"""
     def __init__(self, i2c, address=DEFAULT_I2C_ADDR, debug=False):
         import adafruit_bus_device.i2c_device as i2c_device
         self._i2c = i2c_device.I2CDevice(i2c, address)
@@ -592,7 +599,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
 
 # concrete subclass for SPI
 class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
-    """Driver for Sparkfun AS3935 Lightning Detector over SPI"""
+    """Driver subclass for Sparkfun AS3935 Lightning Detector over SPI"""
     def __init__(self, spi, cs, debug=False):
         # We can't use SPIDevice becasue of the required cha-cha-cha
         # on the CS line (CS=High, Low, High) after each read
