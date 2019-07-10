@@ -205,7 +205,7 @@ class Sparkfun_QwiicAS3935(ABC):
         Other oscilator frequenciess are available as well:
         osc = 1, TRCO - Timer RCO Oscillators 1.1MHz
         osc = 2, SRCO - System RCO at 32.768kHz
-        osc = 3, LCO  - Frequency of the Antenna""""
+        osc = 3, LCO  - Frequency of the Antenna"""
         # REG0x08, bits [5,6,7], manufacturer default: 0.
         # osc 1, bit[5] = TRCO - Timer RCO Oscillators 1.1MHz
         # osc 2, bit[6] = SRCO - System RCO at 32.768kHz
