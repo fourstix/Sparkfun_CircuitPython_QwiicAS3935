@@ -29,16 +29,17 @@ CircuitPython driver library for the Sparkfun AS3935 Lightning Detector
 * Author(s): Gaston Williams
 
 * Based on the Arduino library for the Qwiic AS3935 Lightning Detector
-* Written by Elias Santistevan @ SparkFun Electronics in January, 2019
+Written by Elias Santistevan @ SparkFun Electronics in January, 2019
+
 * I2C Register read functions based on code written by Phil Fenstermacher
-* on December, 2014 as part of the RPi_AS3935 python library.
+on December, 2014 as part of the RPi_AS3935 python library.
 
 Implementation Notes
 --------------------
 
 **Hardware:**
 
-*  This is library is for the SparkFun Qwiic Joystick.
+*  This is library is for the SparkFun Qwiic AS3935 Lightning Detector.
 *  SparkFun sells these at its website: www.sparkfun.com
 *  Do you like this library? Help support SparkFun. Buy a board!
    https://www.sparkfun.com/products/15276
@@ -106,7 +107,7 @@ _DIV_MASK = const(0x3F)
 
 # abstract base class
 class Sparkfun_QwiicAS3935(ABC):
-    """Driver for Sparkfun AS3935 Lightning Detector"""
+    """Abstract base class for Sparkfun AS3935 Lightning Detector"""
     # pylint: disable=too-many-instance-attributes
 
     # class constants
@@ -125,26 +126,26 @@ class Sparkfun_QwiicAS3935(ABC):
 
     # Antenna frequency
     ANTENNA_FREQ = const(0x03)
-    """Antenna oscillator frequency"""
+    """Select the Antenna oscillator frequency"""
 
     def __init__(self, debug=False):
         self._debug = debug
 
     def power_down(self):
-        """REG0x00, bit[0], manufacturer default: 0.
-        This breakout board  consumes 1-2uA while powered down.
+        """This breakout board consumes 1-2uA while powered down.
         If the board is powered down then the TRCO will need to be recalibrated:
         REG0x08[5] = 1, wait 2 ms, REG0x08[5] = 0.
         SPI and I2-C remain active when the chip is powered down."""
+        #REG0x00, bit[0], manufacturer default: 0.
         self._write_register_bits(_AFE_GAIN, _POWER_MASK, 1, 0)
 
     def wake_up(self):
-        """REG0x3A bit[7].
-        This register holds the state of the timer RC oscillator (TRCO),
+        """This register holds the state of the timer RC oscillator (TRCO),
         after it has been calibrated. The TRCO will need to be recalibrated
-        after power down. The following function wakes the IC, sends the "Direct Command" to
+        after power down. The following function wakes the IC, sends the Direct Command to
         CALIB_RCO register REG0x3D, waits a bit and then checks that it has been successfully
         calibrated. Note that SPI and I2C are active during power down."""
+        # REG0x3A bit[7].
 
         # Set the power down bit to zero to wake it up
         self._write_register_bits(_AFE_GAIN, _POWER_MASK, 0, 0)
@@ -166,9 +167,9 @@ class Sparkfun_QwiicAS3935(ABC):
         return bool(calibrated)
 
     def clear_statistics(self):
-        """REG0x02, bit [6], manufacturer default: 1.
-        This register clears the number of lightning strikes that has been read in
-        the last 15 minute block."""
+        """This register clears the number of lightning strikes that has been
+         read in the last 15 minute block."""
+        # REG0x02, bit [6], manufacturer default: 1.
         mask = 1 << 6
         # Write high, then low, then high to clear.
         self._write_register_bits(_LIGHTNING_REG, mask, 1, 6)
@@ -176,13 +177,15 @@ class Sparkfun_QwiicAS3935(ABC):
         self._write_register_bits(_LIGHTNING_REG, mask, 1, 6)
 
     def read_interrupt_register(self):
-        """REG0x03, bits [3:0], manufacturer default: 0.
-        When there is an event that exceeds the watchdog threshold, the register is written
-        with the type of event. This consists of two messages: INT_D (disturber detected) and
-        INT_L (Lightning detected). A third interrupt INT_NH (noise level too HIGH)
-        indicates that the noise level has been exceeded and will persist until the
-        noise has ended. Events are active HIGH. There is a one second window of time to
-        read the interrupt register after lightning is detected, and 1.5 after disturber."""
+        """When there is an event that exceeds the watchdog threshold, the
+        register is written with the type of event. This consists of two
+        messages: INT_D (disturber detected) and INT_L (Lightning detected).
+        A third interrupt INT_NH (noise level too HIGH) indicates that the
+        noise level has been exceeded and will persist until the noise has
+        ended. Events are active HIGH. There is a one second window of time to
+        read the interrupt register after lightning is detected, and 1.5
+        seconds after disturber."""
+        # REG0x03, bits [3:0], manufacturer default: 0.
 
         #A 20 ms delay is added to allow for the memory register to be populated
         # after the interrupt pin goes HIGH. See "Interrupt Management" in datasheet.
@@ -194,13 +197,13 @@ class Sparkfun_QwiicAS3935(ABC):
         return value
 
     def display_oscillator(self, state, osc):
-        """REG0x08, bits [5,6,7], manufacturer default: 0.
-        This will send the frequency of the oscillators to the IRQ pin.
+        """This will send the frequency of the oscillators to the IRQ pin.
         osc 1, bit[5] = TRCO - Timer RCO Oscillators 1.1MHz
         osc 2, bit[6] = SRCO - System RCO at 32.768kHz
         osc 3, bit[7] = LCO - Frequency of the Antenna
         State is True/False for on/off and
         Oscillator value must be between 1 and 3"""
+        # REG0x08, bits [5,6,7], manufacturer default: 0.
         # Check the state to turn on or off
         if state:
             value = 1
@@ -242,20 +245,20 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def distance_to_storm(self):
-        """REG0x07, bit [5:0], manufacturer default: 0.
-        This register holds the distance to the front of the storm and not the
-        distance to a lightning strike."""
+        """Returns the distance to the front of the storm and not the
+        distance to a particular lightning strike."""
+        # REG0x07, bit [5:0], manufacturer default: 0.
         distance = self._read_register(_DISTANCE)
         return distance & ~_DISTANCE_MASK
 
     @property
     def lightning_energy(self):
-        """LSB =  REG0x04, bits[7:0]
-        MSB =  REG0x05, bits[7:0]
-        MMSB = REG0x06, bits[4:0]
-        This returns a 20 bit value that is the 'energy' of the lightning strike.
-        According to the datasheet this is only a pure value that doesn't have any
-        physical meaning."""
+        """This returns a 20 bit value that represents the energy of the
+        lightning strike. According to the datasheet this is only a pure value
+        that doesn't have any physical meaning."""
+        # LSB =  REG0x04, bits[7:0]
+        # MSB =  REG0x05, bits[7:0]
+        # MMSB = REG0x06, bits[4:0]
         value = self._read_register(_ENERGY_LIGHT_MMSB)
         # Only first four bits of MMSB are valid
         value &= ~_ENERGY_MASK
@@ -270,7 +273,7 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def connected(self):
-        """Get the AFE setting to verify the AS3935 is connected to the bus."""
+        """Verify the AS3935 is connected to the bus."""
         value = self._read_register(_AFE_GAIN)
         value &= ~_IO_MASK
         mode = value >> 1
@@ -280,17 +283,18 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def indoor_outdoor(self):
-        """REG0x00, bits [5:1], manufacturer default: 10010 (INDOOR).
-        This funciton changes toggles the chip's settings for Indoors and Outdoors."""
+        """This funciton changes toggles the chip's analog front end settings
+         for Indoors or Outdoors operation."""
+        # REG0x00, bits [5:1], manufacturer default: 10010 (INDOOR).
         value = self._read_register(_AFE_GAIN)
         value &= ~_IO_MASK
         return value >> 1
 
     @indoor_outdoor.setter
     def indoor_outdoor(self, value):
-        """REG0x00, bits [5:1], manufacturer default: 10010 (INDOOR).
-        This funciton changes the chip's settings for Indoors and Outdoors.
+        """This funciton changes the chip's settings for Indoors and Outdoors.
         Only values of either INDOOR (0x12) or OUTDOOR (OX0E) are allowed."""
+        # REG0x00, bits [5:1], manufacturer default: 10010 (INDOOR).
         if value == self.INDOOR:
             self._write_register_bits(_AFE_GAIN, _GAIN_MASK, self.INDOOR, 1)
         elif value == self.OUTDOOR:
@@ -307,9 +311,9 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @watchdog_threshold.setter
     def watchdog_threshold(self, value):
-        """REG0x01, bits[3:0], manufacturer default: 0010 (2).
-        This function returns the threshold for events that trigger the IRQ Pin.
-        Only sensitivity threshold values 1 to 10 allowed."""
+        """This function returns the threshold for events that trigger the IRQ
+         Pin. Only sensitivity threshold values 1 to 10 allowed."""
+        # REG0x01, bits[3:0], manufacturer default: 0010 (2).
         if value < 1 or value > 10:
             raise ValueError('Only sensitivity threshold values 1 to 10 allowed.')
 
@@ -317,19 +321,21 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def noise_level(self):
-        """REG0x01, bits [6:4], manufacturer default: 010 (2).
-        This function will return the set noise level threshold: default is 2."""
+        """This function will return the value of noise level threshold. The 
+        default is 2."""
+        # REG0x01, bits [6:4], manufacturer default: 010 (2).
         value = self._read_register(_THRESHOLD)
         value &= _NOISE_FLOOR_MASK
         return value >> 4
 
     @noise_level.setter
     def noise_level(self, value):
-        """REG0x01, bits [6:4], manufacturer default: 010 (2).
-        The noise floor level is compared to a known reference voltage. If this
-        level is exceeded the chip will issue an interrupt to the IRQ pin,
+        """The noise floor level is compared to a known reference voltage. If
+        this level is exceeded the chip will issue an interrupt to the IRQ pin,
         broadcasting that it can not operate properly due to noise (INT_NH).
-        Check datasheet for specific noise level tolerances when setting this register."""
+        Check datasheet for specific noise level tolerances when setting this
+         register."""
+        # REG0x01, bits [6:4], manufacturer default: 010 (2).
         if value < 1 or value > 7:
             raise ValueError('Only noise levels of 1 to 7 are allowed.')
 
@@ -337,11 +343,12 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def spike_rejection(self):
-        """REG0x02, bits [3:0], manufacturer default: 0010 (2).
-        Return the value of the spike rejection register. This value helps to differentiate
-        between events and acutal lightning, by analyzing the shape of the spike during
-        chip's signal validation routine. Increasing this value increases robustness at
-        the cost of sensitivity to distant events."""
+        """Return the value of the spike rejection register. This value helps
+        to differentiate between events and acutal lightning, by analyzing the
+        shape of the spike during chip's signal validation routine. Increasing
+        this value increases robustness at the cost of sensitivity to distant
+        events."""
+        # REG0x02, bits [3:0], manufacturer default: 0010 (2).
         value = self._read_register(_LIGHTNING_REG)
         value &= ~_R_SPIKE_MASK
         return value
@@ -349,12 +356,12 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @spike_rejection.setter
     def spike_rejection(self, value):
-        """REG0x02, bits [3:0], manufacturer default: 0010 (2).
-        This setting, like the watchdog threshold, can help determine between false
-        events and actual lightning. The shape of the spike is analyzed during the
-        chip's signal validation routine. Increasing this value increases robustness
-        at the cost of sensitivity to distant events.
-        The Spike rejection value must be from 1 to 11."""
+        """This setting, like the watchdog threshold, can help determine
+        between false events and actual lightning. The shape of the spike is
+        analyzed during the chip's signal validation routine. Increasing this
+         value increases robustness at the cost of sensitivity to distant
+         events. The Spike rejection value must be from 1 to 11."""
+        # REG0x02, bits [3:0], manufacturer default: 0010 (2).
         if value < 1 or value > 11:
             raise ValueError("Spike rejection value must be from 1 to 11.")
 
@@ -362,9 +369,10 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def lightning_threshold(self):
-        """REG0x02, bits [5:4], manufacturer default: 0 (single lightning strike).
-        This function will return the number of lightning strikes must strike within
-        a 15 minute window before it triggers an event on the IRQ pin. Default is 1."""
+        """This function will return the number of lightning strikes must
+        strike within a 15 minute window before it triggers an event on the
+         IRQ pin. Default is 1."""
+        # REG0x02, bits [5:4], manufacturer default: 0 (single strike).
         value = self._read_register(_LIGHTNING_REG)
         value &= ~_LIGHT_MASK
         value >>= 4
@@ -383,10 +391,10 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @lightning_threshold.setter
     def lightning_threshold(self, value):
-        """ REG0x02, bits [5:4], manufacturer default: 0 (single lightning strike).
-        The number of lightning events before IRQ is set high. 15 minutes is The
-        window of time before the number of detected lightning events is reset.
-        The number of lightning strikes can only be set to 1, 5, 9 or 16."""
+        """The number of lightning events before IRQ is set high. 15 minutes
+        is the window of time before the number of detected lightning events is
+        reset. The number of lightning strikes can only be set to 1, 5, 9 or 16."""
+        # REG0x02, bits [5:4], manufacturer default: 0 (single strike).
         # bit mask 0x30
         mask = (1<<5)|(1<<4)
 
@@ -403,8 +411,9 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def mask_disturber(self):
-        """REG0x03, bit [5], manufacturere default: 0.
-        This setting will return whether or not disturbers trigger the IRQ pin."""
+        """This setting will return whether or not disturbers trigger the 
+        IRQ pin."""
+        # REG0x03, bit [5], manufacturere default: 0.
         value = self._read_register(_INT_MASK_ANT)
         value &= ~_DISTURB_MASK
         return value >> 5
@@ -412,8 +421,9 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @mask_disturber.setter
     def mask_disturber(self, value):
-        """REG0x03, bit [5], manufacturere default: 0.
-        Setting this True or False will change whether or not disturbers trigger the IRQ pin."""
+        """Setting this True or False will change whether or not disturbers
+         trigger the IRQ pin."""
+        # REG0x03, bit [5], manufacturere default: 0.
         # bit mask 0x10
         mask = 1<<5
         if value:
@@ -423,12 +433,12 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def division_ratio(self):
-        """REG0x03, bit [7:6], manufacturer default: 0 (16 division ratio).
-        This function returns the current division ratio of the resonance frequency.
+        """This function returns the current division ratio of the resonance frequency.
         The antenna resonance frequency should be within 3.5 percent of 500kHz, and
         so when modifying the resonance frequency with the internal capacitors
         (tuneCap()) it's important to keep in mind that the displayed frequency on
         the IRQ pin is divided by this number."""
+        # REG0x03, bit [7:6], manufacturer default: 0 (16 division ratio).
         value = self._read_register(_INT_MASK_ANT)
         value &= ~_DIV_MASK
 
@@ -446,11 +456,11 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @division_ratio.setter
     def division_ratio(self, value):
-        """REG0x03, bit [7:6], manufacturer default: 0 (16 division ratio).
-        The antenna is designed to resonate at 500kHz and so can be tuned with the
-        following setting. The accuracy of the antenna must be within 3.5 percent of
-        that value for proper signal validation and distance estimation.
-        The division ratio can only be set to 16, 32, 64 or 128."""
+        """The antenna is designed to resonate at 500kHz and so can be tuned
+        with the following setting. The accuracy of the antenna must be within
+        3.5 percent of that value for proper signal validation and distance
+         estimation. The division ratio can only be set to 16, 32, 64 or 128."""
+        # REG0x03, bit [7:6], manufacturer default: 0 (16 division ratio).
         # bit mask 0xC0
         mask = (1<<7)|(1<<6)
 
@@ -467,10 +477,10 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def tune_cap(self):
-        """REG0x08, bits [3:0], manufacturer default: 0.
-        This setting will return the capacitance of the internal capacitors. It will
+        """This setting will return the capacitance of the internal capacitors. It will
         return a value from one to 15 multiplied by the 8pF steps of the internal
         capacitance."""
+        # REG0x08, bits [3:0], manufacturer default: 0.
 
         value = self._read_register(_FREQ_DISP_IRQ)
         value &= _CAP_MASK
@@ -480,10 +490,10 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @tune_cap.setter
     def tune_cap(self, value):
-        """REG0x08, bits [3:0], manufacturer default: 0.
-        This setting will add capacitance to the series RLC antenna on the product.
-        It's possible to add 0-120pF in steps of 8pF to the antenna.
+        """This setting will add capacitance to the series RLC antenna on the
+         product. It's possible to add 0-120pF in steps of 8pF to the antenna.
         The Tuning Cap value must be between 0 and 15."""
+        # REG0x08, bits [3:0], manufacturer default: 0.
         if value < 0 or value > 15:
             raise ValueError('The Tuning Cap value must be between 0 and 15.')
 
