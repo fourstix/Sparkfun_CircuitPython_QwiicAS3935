@@ -132,20 +132,19 @@ class Sparkfun_QwiicAS3935(ABC):
         self._debug = debug
 
     def power_down(self):
-        """This breakout board consumes 1-2uA while powered down.
-        If the board is powered down then the TRCO will need to be recalibrated:
-        REG0x08[5] = 1, wait 2 ms, REG0x08[5] = 0.
-        SPI and I2-C remain active when the chip is powered down."""
+        """Thid breakout board consumes 1-2uA while powered down. If the board
+        is powered down then the TRCO will need to be recalibrated by calling
+        the wake up function. SPI and I2-C remain active when the chip is
+        powered down."""
         #REG0x00, bit[0], manufacturer default: 0.
         self._write_register_bits(_AFE_GAIN, _POWER_MASK, 1, 0)
 
     def wake_up(self):
-        """This register holds the state of the timer RC oscillator (TRCO),
-        after it has been calibrated. The TRCO will need to be recalibrated
-        after power down. The following function wakes the IC, sends the Direct Command to
-        CALIB_RCO register REG0x3D, waits a bit and then checks that it has been successfully
+        """ The following function wakes the Lightning Detector after power
+        down. The timer RC oscillator (TRCO) needs to be recalibrated after
+        power down. This function sends the Direct Command to the CALIB_RCO
+        register 0x3D waits a bit and then checks that it has been successfully
         calibrated. Note that SPI and I2C are active during power down."""
-        # REG0x3A bit[7].
 
         # Set the power down bit to zero to wake it up
         self._write_register_bits(_AFE_GAIN, _POWER_MASK, 0, 0)
@@ -224,11 +223,13 @@ class Sparkfun_QwiicAS3935(ABC):
         self._write_register(_DEFAULT_RESET, _DIRECT_COMMAND)
 
     def calibrate(self):
-        """Send command to calibrate the oscillators"""
+        """Send command to calibrate the oscillators."""
+
         self._write_register(_CALIB_RCO, _DIRECT_COMMAND)
         # Give time for the internal oscillators to start up.
         sleep(0.002)
 
+        # REG0x08[5] = 1, wait 2 ms, REG0x08[5] = 0.
         # According to data sheet pg 23, section 8.11, one must
         # write a 1 to reg 0x08 bit 5 wait 2ms and then write a zero
         self._write_register_bits(_FREQ_DISP_IRQ, _OSC_MASK, 1, 5)
@@ -304,8 +305,9 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def watchdog_threshold(self):
-        """REG0x01, bits[3:0], manufacturer default: 0010 (2).
-        This function returns the threshold for events that trigger the IRQ Pin."""
+        """This function returns the threshold for events that trigger the IRQ
+        Pin."""
+        # REG0x01, bits[3:0], manufacturer default: 0010 (2).
         value = self._read_register(_THRESHOLD)
         return value & _THRESH_MASK
 
