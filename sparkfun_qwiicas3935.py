@@ -321,7 +321,7 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def noise_level(self):
-        """This function will return the value of noise level threshold. The 
+        """This function will return the value of noise level threshold. The
         default is 2."""
         # REG0x01, bits [6:4], manufacturer default: 010 (2).
         value = self._read_register(_THRESHOLD)
@@ -411,7 +411,7 @@ class Sparkfun_QwiicAS3935(ABC):
 
     @property
     def mask_disturber(self):
-        """This setting will return whether or not disturbers trigger the 
+        """This setting will return whether or not disturbers trigger the
         IRQ pin."""
         # REG0x03, bit [5], manufacturere default: 0.
         value = self._read_register(_INT_MASK_ANT)
