@@ -29,10 +29,10 @@ CircuitPython driver library for the Sparkfun AS3935 Lightning Detector
 * Author(s): Gaston Williams
 
 * Based on the Arduino library for the Qwiic AS3935 Lightning Detector
-Written by Elias Santistevan @ SparkFun Electronics in January, 2019
+  Written by Elias Santistevan @ SparkFun Electronics in January, 2019
 
 * I2C Register read functions based on code written by Phil Fenstermacher
-on December, 2014 as part of the RPi_AS3935 python library.
+  on December, 2014 as part of the RPi_AS3935 python library.
 
 Implementation Notes
 --------------------
