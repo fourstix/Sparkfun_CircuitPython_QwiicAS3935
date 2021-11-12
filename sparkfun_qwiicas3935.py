@@ -590,7 +590,6 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             raise ValueError("Register value must be in the range of 0x00 to 0x08")
 
         with self._i2c as i2c:
-            i2c.write(bytes([0x00]))
             # Write to the base address, then read all data registers in a
             # single block read. Then return the desired value from the list.
             # Successive individual byte reads, tend to fail. This trick
@@ -600,7 +599,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             # trick is required because smbus doesn't support repeated I2C
             # starts to read the registers directly (singularly) on the sensor.
             result = bytearray(9)
-            i2c.readinto(result)
+            i2c.write_then_readinto(bytes([0x00]), result)
             if self._debug:
                 print([hex(i) for i in result])
                 print("$%02X => %s" % (register, hex(result[register])))
@@ -612,7 +611,6 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
         # contains the lightning look-up tables and calibration registers.
         # The read_register is more efficent for more frequent data registers.
         with self._i2c as i2c:
-            i2c.write(bytes([0x00]))
             # Write to the base address, then read all data registers in a
             # single block read. Then return the desired value from the list.
             # Successive individual byte reads, tend to fail. This trick
@@ -624,7 +622,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             # trick is required because smbus doesn't support repeated I2C
             # starts to read the registers directly (singularly) on the sensor.
             result = bytearray(0x3E)
-            i2c.readinto(result)
+            i2c.write_then_readinto(bytes([0x00]), result)
             if self._debug:
                 print([hex(i) for i in result])
                 print("$%02X => %s" % (register, hex(result[register])))
