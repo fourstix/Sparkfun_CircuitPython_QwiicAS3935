@@ -5,4 +5,4 @@
 .. use this format as the module name: "adafruit_foo.foo"
 
 .. automodule:: sparkfun_qwiicas3935
-   :members:
+    :members:
