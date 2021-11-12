@@ -1,17 +1,23 @@
 Introduction
 ============
-
 .. image:: https://readthedocs.org/projects/sparkfun-circuitpython-qwiicas3935/badge/?version=latest
     :target: https://sparkfun-circuitpython-qwiicas3935.readthedocs.io/en/latest/
     :alt: Documentation Status
+
 
 .. image:: https://img.shields.io/discord/327254708534116352.svg
     :target: https://adafru.it/discord
     :alt: Discord
 
-.. image:: https://travis-ci.org/fourstix/Sparkfun_CircuitPython_Qwiicas3935.svg?branch=master
-    :target: https://travis-ci.org/fourstix/Sparkfun_CircuitPython_Qwiicas3935
+
+.. image:: https://github.com/fourstix/Sparkfun_CircuitPython_QwiicAS3935/workflows/Build%20CI/badge.svg
+    :target: https://github.com/fourstix/Sparkfun_CircuitPython_QwiicAS3935/actions
     :alt: Build Status
+
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+    :alt: Code Style: Black
 
 CircuitPython library for Sparkfun Qwiic AS3935 Lightning Detector.  This library is ported from
 `SparkFun Qwiic AS3935 Lightning Detector Arduino Library <https://github.com/sparkfun/SparkFun_AS3935_Lightning_Detector_Arduino_Library>`_
@@ -34,7 +40,9 @@ This driver depends on:
 
 Please ensure all dependencies are available on the CircuitPython filesystem.
 This is easily achieved by downloading
-`the Adafruit library and driver bundle <https://github.com/adafruit/Adafruit_CircuitPython_Bundle>`_.
+`the Adafruit library and driver bundle <https://circuitpython.org/libraries>`_
+or individual libraries can be installed using
+`circup <https://github.com/adafruit/circup>`_.
 
 Raspberry Pi Setup
 ------------------
@@ -78,13 +86,11 @@ Quick Start Summary:
     pip3 install adafruit-blinka
 
 Installing from PyPI
---------------------
+=====================
+
 On supported GNU/Linux systems like the Raspberry Pi, you can install the driver locally `from
-PyPI <https://pypi.org/project/sparkfun-circuitpython-qwiicas3935/>`_.
-
-Installing this library will also install the dependency adafruit-circuitpython-busdevice.
-
-Installing from PyPI
+PyPI <https://pypi.org/project/Sparkfun-circuitpython-qwiicas3935/>`_.
+To install for current user:
 
 .. code-block:: shell
 
@@ -104,6 +110,31 @@ To install in a virtual environment in your current project:
     python3 -m venv .env
     source .env/bin/activate
     pip3 install sparkfun-circuitpython-qwiicas3935
+
+
+
+Installing to a Connected CircuitPython Device with Circup
+==========================================================
+
+Make sure that you have ``circup`` installed in your Python environment.
+Install it with the following command if necessary:
+
+.. code-block:: shell
+
+    pip3 install circup
+
+With ``circup`` installed and your CircuitPython device connected use the
+following command to install:
+
+.. code-block:: shell
+
+    circup install qwiicas3935
+
+Or the following command to update an existing version:
+
+.. code-block:: shell
+
+    circup update
 
 Usage Example
 =============
@@ -130,13 +161,18 @@ Usage Example
     # cs.direction = digitalio.Direction.OUTPUT
     # as3935 = QwiicAS3935_SPI(spi, cs)
 
-
 Contributing
 ============
 
 Contributions are welcome! Please read our `Code of Conduct
-<https://github.com/fourstix/Sparkfun_CircuitPython_QwiicAS3935/blob/master/CODE_OF_CONDUCT.md>`_
+<https://github.com/fourstix/Sparkfun_CircuitPython_QwiicAS3935/blob/HEAD/CODE_OF_CONDUCT.md>`_
 before contributing to help this project stay welcoming.
+
+Documentation
+=============
+
+For information on building library documentation, please check out
+`this guide <https://learn.adafruit.com/creating-and-sharing-a-circuitpython-library/sharing-our-docs-on-readthedocs#sphinx-5-1>`_.
 
 Building locally
 ================
@@ -168,7 +204,7 @@ Then run the build:
 Sphinx documentation
 -----------------------
 
-Sphinx is used to build the documentation based on rST files and comments in the code. First,
+Sphinx is used to build the documentation based on rst files and comments in the code. First,
 install dependencies (feel free to reuse the virtual environment from above):
 
 .. code-block:: shell
