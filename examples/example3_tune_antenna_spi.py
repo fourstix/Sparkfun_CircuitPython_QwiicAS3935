@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: Copyright (c) 2021 Gaston Williams
+#
+# SPDX-License-Identifier: MIT
+
 #  This is example is for the SparkFun Qwiic AS3935 Lightning Detector.
 #  SparkFun sells these at its website: www.sparkfun.com
 #  Do you like this library? Help support SparkFun. Buy a board!

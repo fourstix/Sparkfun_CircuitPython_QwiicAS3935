@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2017 Scott Shawcroft, written for Adafruit Industries
+# SPDX-FileCopyrightText: Copyright (c) 2021 Gaston Williams
+#
+# SPDX-License-Identifier: MIT
 # The MIT License (MIT)
 #
 # Copyright (c) 2019 Gaston Williams
@@ -52,11 +56,11 @@ Implementation Notes
 * Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
 """
 
+# imports__version__ = "0.0.0-auto.0"
 __version__ = "0.0.0-auto.0"
 __repo__ = "https://github.com/fourstix/Sparkfun_CircuitPython_QwiicAS3935.git"
 
 # imports
-from abc import ABC, abstractmethod
 from time import sleep
 from micropython import const
 
@@ -106,7 +110,7 @@ _CALIB_MASK = const(0x7F)
 _DIV_MASK = const(0x3F)
 
 # abstract base class
-class Sparkfun_QwiicAS3935(ABC):
+class Sparkfun_QwiicAS3935:
     """Abstract base class for Sparkfun AS3935 Lightning Detector.
     Use the appropriate driver subclass Sprarkfun_QwiicAS3935_I2C() for I2C
     or Sparkfun_QwiicAS3935_SPI() for SPI."""
@@ -511,15 +515,12 @@ class Sparkfun_QwiicAS3935(ABC):
         self._write_register_bits(_FREQ_DISP_IRQ, _CAP_MASK, reg_value, 0)
 
     # abstract methods
-    @abstractmethod
     def _read_register(self, register):
         pass
 
-    @abstractmethod
     def _read_byte(self, register):
         pass
 
-    @abstractmethod
     def _write_register(self, register, value):
         pass
 
