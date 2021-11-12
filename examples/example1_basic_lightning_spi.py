@@ -57,7 +57,7 @@ def reduce_noise(value):
     # warns that smartphone and smart watch displays, DC-DC converters, and/or
     # anything that operates in 500 kHz range are noise sources to be avoided.
     # The manufacturer's default value is 2 with a maximum value of 7.
-    value =+ 1
+    value += 1
 
     if value > 7:
         print('Noise floor is at the maximum value.')
