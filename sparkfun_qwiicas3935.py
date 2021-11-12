@@ -80,8 +80,8 @@ _INT_MASK_ANT = const(0x03)
 _ENERGY_LIGHT_LSB = const(0x04)
 _ENERGY_LIGHT_MSB = const(0x05)
 _ENERGY_LIGHT_MMSB = const(0x06)
-_DISTANCE = (0x07)
-_FREQ_DISP_IRQ = (0x08)
+_DISTANCE = 0x07
+_FREQ_DISP_IRQ = 0x08
 
 # calibration registers
 _CALIB_TRCO = const(0x3A)
@@ -114,6 +114,7 @@ class Sparkfun_QwiicAS3935:
     """Abstract base class for Sparkfun AS3935 Lightning Detector.
     Use the appropriate driver subclass Sprarkfun_QwiicAS3935_I2C() for I2C
     or Sparkfun_QwiicAS3935_SPI() for SPI."""
+
     # pylint: disable=too-many-instance-attributes
 
     # class constants
@@ -142,7 +143,7 @@ class Sparkfun_QwiicAS3935:
         is powered down, then the TRCO must be recalibrated by calling the
         wake_up() function. Note that SPI and I2C remain active when the chip
         is powered down."""
-        #REG0x00, bit[0], manufacturer default: 0.
+        # REG0x00, bit[0], manufacturer default: 0.
         self._write_register_bits(_AFE_GAIN, _POWER_MASK, 1, 0)
 
     def wake_up(self):
@@ -192,10 +193,12 @@ class Sparkfun_QwiicAS3935:
         lightning is detected, and 1.5 seconds after disturber."""
         # REG0x03, bits [3:0], manufacturer default: 0.
 
-        #A 20 ms delay is added to allow for the memory register to be populated
+        # A 20 ms delay is added to allow for the memory register to be populated
         # after the interrupt pin goes HIGH. See "Interrupt Management" in datasheet.
         sleep(0.020)
 
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_INT_MASK_ANT)
         # Only need the first four bits [3:0]
         value &= ~_INT_MASK
@@ -227,7 +230,7 @@ class Sparkfun_QwiicAS3935:
         elif osc == 3:
             self._write_register_bits(_FREQ_DISP_IRQ, _OSC_MASK, value, 7)
         else:
-            raise ValueError('Oscillator value must be between 1 and 3')
+            raise ValueError("Oscillator value must be between 1 and 3")
 
     def reset(self):
         """Reset all the device registers to initial power-on default values"""
@@ -260,6 +263,8 @@ class Sparkfun_QwiicAS3935:
         """Returns the distance to the front of the storm and not the
         distance to a particular lightning strike."""
         # REG0x07, bit [5:0], manufacturer default: 0.
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         distance = self._read_register(_DISTANCE)
         return distance & ~_DISTANCE_MASK
 
@@ -271,14 +276,20 @@ class Sparkfun_QwiicAS3935:
         # LSB =  REG0x04, bits[7:0]
         # MSB =  REG0x05, bits[7:0]
         # MMSB = REG0x06, bits[4:0]
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_ENERGY_LIGHT_MMSB)
         # Only first four bits of MMSB are valid
         value &= ~_ENERGY_MASK
         energy = value << 16
         # Get the MSB
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_ENERGY_LIGHT_MSB)
         energy |= value << 8
         # Get the LSB
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_ENERGY_LIGHT_LSB)
         energy |= value
         return energy
@@ -286,18 +297,23 @@ class Sparkfun_QwiicAS3935:
     @property
     def connected(self):
         """Verify the AS3935 is connected to the bus."""
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_AFE_GAIN)
         value &= ~_IO_MASK
         mode = value >> 1
-        return mode == self.INDOOR or mode == self.OUTDOOR
+        # return mode == self.INDOOR or mode == self.OUTDOOR
+        return mode in (self.INDOOR, self.OUTDOOR)
 
     # properties (read-write)
 
     @property
     def indoor_outdoor(self):
         """This funciton changes toggles the chip's analog front end settings
-         for Indoors or Outdoors operation."""
+        for Indoors or Outdoors operation."""
         # REG0x00, bits [5:1], manufacturer default: 10010 (INDOOR).
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_AFE_GAIN)
         value &= ~_IO_MASK
         return value >> 1
@@ -308,27 +324,33 @@ class Sparkfun_QwiicAS3935:
         Only values of either INDOOR (0x12) or OUTDOOR (OX0E) are allowed."""
         # REG0x00, bits [5:1], manufacturer default: 10010 (INDOOR).
         if value == self.INDOOR:
+            # abstract method implemented in child
             self._write_register_bits(_AFE_GAIN, _GAIN_MASK, self.INDOOR, 1)
         elif value == self.OUTDOOR:
+            # abstract method implemented in child
             self._write_register_bits(_AFE_GAIN, _GAIN_MASK, self.OUTDOOR, 1)
         else:
-            raise ValueError("Only values of either INDOOR (0x12) or OUTDOOR (OX0E) are allowed.")
+            raise ValueError(
+                "Only values of either INDOOR (0x12) or OUTDOOR (OX0E) are allowed."
+            )
 
     @property
     def watchdog_threshold(self):
         """This function returns the threshold for events that trigger the IRQ
         Pin."""
         # REG0x01, bits[3:0], manufacturer default: 0010 (2).
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_THRESHOLD)
         return value & _THRESH_MASK
 
     @watchdog_threshold.setter
     def watchdog_threshold(self, value):
         """This function returns the threshold for events that trigger the IRQ
-         Pin. Only sensitivity threshold values 1 to 10 allowed."""
+        Pin. Only sensitivity threshold values 1 to 10 allowed."""
         # REG0x01, bits[3:0], manufacturer default: 0010 (2).
         if value < 1 or value > 10:
-            raise ValueError('Only sensitivity threshold values 1 to 10 allowed.')
+            raise ValueError("Only sensitivity threshold values 1 to 10 allowed.")
 
         self._write_register_bits(_THRESHOLD, _THRESH_MASK, value, 0)
 
@@ -337,6 +359,8 @@ class Sparkfun_QwiicAS3935:
         """This function will return the value of noise level threshold. The
         default is 2."""
         # REG0x01, bits [6:4], manufacturer default: 010 (2).
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_THRESHOLD)
         value &= _NOISE_FLOOR_MASK
         return value >> 4
@@ -350,7 +374,7 @@ class Sparkfun_QwiicAS3935:
          register."""
         # REG0x01, bits [6:4], manufacturer default: 010 (2).
         if value < 1 or value > 7:
-            raise ValueError('Only noise levels of 1 to 7 are allowed.')
+            raise ValueError("Only noise levels of 1 to 7 are allowed.")
 
         self._write_register_bits(_THRESHOLD, _NOISE_FLOOR_MASK, value, 4)
 
@@ -362,10 +386,11 @@ class Sparkfun_QwiicAS3935:
         this value increases robustness at the cost of sensitivity to distant
         events."""
         # REG0x02, bits [3:0], manufacturer default: 0010 (2).
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_LIGHTNING_REG)
         value &= ~_R_SPIKE_MASK
         return value
-
 
     @spike_rejection.setter
     def spike_rejection(self, value):
@@ -386,6 +411,8 @@ class Sparkfun_QwiicAS3935:
         strike within a 15 minute window before it triggers an event on the
         IRQ pin. Default is 1."""
         # REG0x02, bits [5:4], manufacturer default: 0 (single strike).
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_LIGHTNING_REG)
         value &= ~_LIGHT_MASK
         value >>= 4
@@ -409,7 +436,7 @@ class Sparkfun_QwiicAS3935:
         reset. The number of lightning strikes can only be set to 1, 5, 9 or 16."""
         # REG0x02, bits [5:4], manufacturer default: 0 (single strike).
         # bit mask 0x30
-        mask = (1<<5)|(1<<4)
+        mask = (1 << 5) | (1 << 4)
 
         if value == 1:
             self._write_register_bits(_LIGHTNING_REG, mask, 0, 4)
@@ -420,17 +447,18 @@ class Sparkfun_QwiicAS3935:
         elif value == 16:
             self._write_register_bits(_LIGHTNING_REG, mask, 3, 4)
         else:
-            raise ValueError('Lightning threshold can only be set to 1, 5, 9 or 16.')
+            raise ValueError("Lightning threshold can only be set to 1, 5, 9 or 16.")
 
     @property
     def mask_disturber(self):
         """This setting will return whether or not disturbers trigger the
         IRQ pin."""
         # REG0x03, bit [5], manufacturere default: 0.
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_INT_MASK_ANT)
         value &= ~_DISTURB_MASK
         return value >> 5
-
 
     @mask_disturber.setter
     def mask_disturber(self, value):
@@ -438,7 +466,7 @@ class Sparkfun_QwiicAS3935:
         trigger the IRQ pin."""
         # REG0x03, bit [5], manufacturere default: 0.
         # bit mask 0x10
-        mask = 1<<5
+        mask = 1 << 5
         if value:
             self._write_register_bits(_INT_MASK_ANT, mask, 1, 5)
         else:
@@ -452,6 +480,8 @@ class Sparkfun_QwiicAS3935:
         (tuneCap()) it's important to keep in mind that the displayed frequency on
         the IRQ pin is divided by this number."""
         # REG0x03, bit [7:6], manufacturer default: 0 (16 division ratio).
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_INT_MASK_ANT)
         value &= ~_DIV_MASK
 
@@ -475,7 +505,7 @@ class Sparkfun_QwiicAS3935:
         estimation. The division ratio can only be set to 16, 32, 64 or 128."""
         # REG0x03, bit [7:6], manufacturer default: 0 (16 division ratio).
         # bit mask 0xC0
-        mask = (1<<7)|(1<<6)
+        mask = (1 << 7) | (1 << 6)
 
         if value == 16:
             self._write_register_bits(_INT_MASK_ANT, mask, 0, 6)
@@ -486,19 +516,19 @@ class Sparkfun_QwiicAS3935:
         elif value == 128:
             self._write_register_bits(_INT_MASK_ANT, mask, 3, 6)
         else:
-            raise ValueError('The division ratio can only be set to 16, 32, 64 or 128.')
+            raise ValueError("The division ratio can only be set to 16, 32, 64 or 128.")
 
     @property
     def tune_cap(self):
         """This setting will return the capacitance of the internal capacitor.
-         It will return a value from 0 to 120pF, in 8pF steps."""
+        It will return a value from 0 to 120pF, in 8pF steps."""
         # REG0x08, bits [3:0], manufacturer default: 0.
-
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(_FREQ_DISP_IRQ)
         value &= _CAP_MASK
         # Tune cap is 4-bit value multiplied by 8pF
         return value * 8
-
 
     @tune_cap.setter
     def tune_cap(self, value):
@@ -510,7 +540,7 @@ class Sparkfun_QwiicAS3935:
         # Divide down to integer 0 - 15, rounding down
         reg_value = value // 8
         if reg_value < 0 or reg_value > 15:
-            raise ValueError('The Tuning Cap value must be between 0 and 120pF.')
+            raise ValueError("The Tuning Cap value must be between 0 and 120pF.")
 
         self._write_register_bits(_FREQ_DISP_IRQ, _CAP_MASK, reg_value, 0)
 
@@ -531,19 +561,25 @@ class Sparkfun_QwiicAS3935:
         # then write the given bits to the register at the given start position.
 
         # Get the current value of the register
+        # abstract method implemented in child
+        # pylint: disable=assignment-from-no-return
         value = self._read_register(reg)
         # Mask the position we want to write to
-        value &= (~mask)
+        value &= ~mask
         # Set the given bits in the variable
-        value |= (bits << start_position)
+        value |= bits << start_position
         # Write the updated variable value back to the register
         self._write_register(reg, value)
+
 
 # concrete subclass for I2C
 class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
     """Driver subclass for Sparkfun AS3935 Lightning Detector over I2C"""
+
     def __init__(self, i2c, address=DEFAULT_I2C_ADDR, debug=False):
+        # pylint: disable=import-outside-toplevel
         import adafruit_bus_device.i2c_device as i2c_device
+
         self._i2c = i2c_device.I2CDevice(i2c, address)
         super().__init__(debug)
 
@@ -600,9 +636,11 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             if self._debug:
                 print("$%02X <= 0x%02X" % (register, value))
 
+
 # concrete subclass for SPI
 class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
     """Driver subclass for Sparkfun AS3935 Lightning Detector over SPI"""
+
     def __init__(self, spi, cs, debug=False):
         # We can't use SPIDevice becasue of the required cha-cha-cha
         # on the CS line (CS=High, Low, High) after each read
@@ -612,7 +650,6 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
         # set cs line high initially
         self._cs.value = True
         super().__init__(debug)
-
 
     def _read_register(self, register):
         # set the address read bits
@@ -626,7 +663,7 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
             # start the read
             self._cs.value = False
             # write msb first
-            self._spi.write(bytearray([addr]))  #pylint: disable=no-member
+            self._spi.write(bytearray([addr]))  # pylint: disable=no-member
             # read the next byte afte writing the address
             result = bytearray(1)
             self._spi.readinto(result)
@@ -634,7 +671,7 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
                 print("$%02X => %s" % (register, [hex(i) for i in result]))
 
             return result[0]
-        #the finally block always executes before return
+        # the finally block always executes before return
         finally:
             # per datasheet CS = HIGH, LOW, HIGH signals the end of a read
             self._cs.value = True
@@ -658,7 +695,7 @@ class Sparkfun_QwiicAS3935_SPI(Sparkfun_QwiicAS3935):
             # start the write
             self._cs.value = False
             # write msb first
-            self._spi.write(bytearray([register, value]))  #pylint: disable=no-member
+            self._spi.write(bytearray([register, value]))  # pylint: disable=no-member
 
             if self._debug:
                 print("$%02X <= 0x%02X" % (register, value))

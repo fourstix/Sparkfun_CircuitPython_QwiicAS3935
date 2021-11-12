@@ -28,10 +28,9 @@
  GPIO D21 on the Raspberry Pi.  The interrupt pin will go high when an
  event occurs.
 """
-
+import sys
 from time import sleep
 import board
-import busio
 import digitalio
 import sparkfun_qwiicas3935
 
@@ -45,7 +44,8 @@ as3935_interrupt_pin.direction = digitalio.Direction.INPUT
 as3935_interrupt_pin.pull = digitalio.Pull.DOWN
 
 # Create bus object using our board's I2C port
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.I2C()
+
 # Create as3935 object
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
 
@@ -60,11 +60,12 @@ def reduce_noise(value):
     value += 1
 
     if value > 7:
-        print('Noise floor is at the maximum value.')
+        print("Noise floor is at the maximum value.")
         return 7
-    print('Increasing the noise event threshold to ', value)
+    print("Increasing the noise event threshold to ", value)
     lightning.noise_level = value
     return value
+
 
 def increase_threshold(value):
     # This function is similar to the one above in that it will increase the
@@ -75,54 +76,55 @@ def increase_threshold(value):
 
     value += 1
     if value > 10:
-        print('Watchdog threshold is at its maximum value')
+        print("Watchdog threshold is at its maximum value")
         return 10
-    print('Increasing the disturber watchdog threshold to ', value)
+    print("Increasing the disturber watchdog threshold to ", value)
     lightning.watchdog_threshold = value
     return value
 
+
 # main code
 
-print('AS3935 Franklin Lightning Detector')
+print("AS3935 Franklin Lightning Detector")
 
 # Check if connected
 if lightning.connected:
-    print('Schmow-ZoW, Lightning Detector Ready!')
+    print("Schmow-ZoW, Lightning Detector Ready!")
 else:
-    print('Lightning Detector does not appear to be connected. Please check wiring.')
-    exit()
+    print("Lightning Detector does not appear to be connected. Please check wiring.")
+    sys.exit()
 
 # get the current noise floor value
 noise_floor = lightning.noise_level
-print('The noise floor is ', noise_floor)
+print("The noise floor is ", noise_floor)
 
 # get the current disturber threshold
 watchdog_threshold = lightning.watchdog_threshold
-print('The disturber watchdog threshold is ', watchdog_threshold)
+print("The disturber watchdog threshold is ", watchdog_threshold)
 
-print('Type Ctrl-C to exit program.')
+print("Type Ctrl-C to exit program.")
 
 try:
     while True:
         # When the interrupt goes high
         if as3935_interrupt_pin.value:
-            print('Interrupt:', end=' ')
+            print("Interrupt:", end=" ")
             interrupt_value = lightning.read_interrupt_register()
 
             if interrupt_value == lightning.NOISE:
-                print('Noise.')
+                print("Noise.")
                 # uncomment line below to adjust the noise level
-                #(see function comments above)
+                # (see function comments above)
                 # noise_floor = reduce_noise(noise_floor)
             elif interrupt_value == lightning.DISTURBER:
-                print('Disturber.')
+                print("Disturber.")
                 # uncomment the line below to adjust the watchdog threshold
-                #(see function comments above)
+                # (see function comments above)
                 # watchdog_threshold = increase_threshold(watchdog_threshold)
             elif interrupt_value == lightning.LIGHTNING:
-                print('Lightning strike detected!')
-                print('Approximately: ' + str(lightning.distance_to_storm) + 'km away!')
-                print('Energy value: ' + str(lightning.lightning_energy))
+                print("Lightning strike detected!")
+                print("Approximately: " + str(lightning.distance_to_storm) + "km away!")
+                print("Energy value: " + str(lightning.lightning_energy))
         sleep(1)
 
 except KeyboardInterrupt:

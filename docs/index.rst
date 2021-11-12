@@ -23,7 +23,7 @@ Table of Contents
 .. toctree::
     :caption: Tutorials
 
-    Sparkfun Qwiic Lightning Detector Hookup Guide <https://learn.sparkfun.com/tutorials/sparkfun-qwiic-as3935-lightning-detector-hookup-guide> 
+    Sparkfun Qwiic Lightning Detector Hookup Guide <https://learn.sparkfun.com/tutorials/sparkfun-qwiic-as3935-lightning-detector-hookup-guide>
 
 .. toctree::
     :caption: Related Products

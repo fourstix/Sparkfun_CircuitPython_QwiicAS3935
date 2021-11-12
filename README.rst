@@ -27,7 +27,7 @@ CircuitPython library for Sparkfun Qwiic AS3935 Lightning Detector.  This librar
     :alt: SparkFun Qwiic AS3935 Lightning Detector (SEN-15276)
 
 `SparkFun Qwiic AS3935 Lightning Detector (SEN-15276) <https://www.sparkfun.com/products/15276>`_
-  
+
 
 
 Dependencies
@@ -48,7 +48,7 @@ Raspberry Pi Setup
 ------------------
 Adafruit has an excellent tutorial on `Installing CircuitPython Libraries on Raspberry Pi
 <https://learn.adafruit.com/circuitpython-on-raspberrypi-linux/installing-circuitpython-on-raspberry-pi/>`_.
- 
+
 Quick Start Summary:
 
 * Start with the latest version of Raspbian with Wifi configured.
@@ -144,7 +144,7 @@ Usage Example
 * Code Example:
 
  .. code-block:: shell
-    
+
     # import the CircuitPython board and busio libraries
     import board
     import busio
@@ -226,11 +226,11 @@ locally verify it will pass.
 
 License Information
 -----------------------
-This product is **open source**! 
+This product is **open source**!
 
-Please review the LICENSE.md file for license information. 
+Please review the LICENSE.md file for license information.
 
-Please use, reuse, and modify these files as you see fit. 
+Please use, reuse, and modify these files as you see fit.
 
 Please maintain the attributions to SparkFun Electronics and Adafruit and release any derivative under the same license.
 

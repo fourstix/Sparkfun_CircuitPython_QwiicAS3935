@@ -22,25 +22,24 @@
  oscillscope, or some method of reading a 32kHz square wave (depending
  on the frequency divsior used) on the INT pin.
 """
-
+import sys
 import board
-import busio
 import sparkfun_qwiicas3935
 
 # Create bus object using our board's I2C port
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.I2C()
 
 # Create as3935 object
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
 
-print('AS3935 Franklin Lightning Detector')
+print("AS3935 Franklin Lightning Detector")
 
 # Check if connected
 if lightning.connected:
-    print('Ready to tune antenna.')
+    print("Ready to tune antenna.")
 else:
-    print('Lightning Detector does not appear to be connected. Please check wiring.')
-    exit()
+    print("Lightning Detector does not appear to be connected. Please check wiring.")
+    sys.exit()
 
 # You can reset all the lightning detector settings back to their default values
 # by uncommenting the line below.
@@ -58,7 +57,7 @@ else:
 
 # The following code is just a sanity check. It will return a value of
 # 16 by default but can be 32, 64, or 128, depending on what value you set.
-print ('Division Ratio is set to: ', str(lightning.division_ratio))
+print("Division Ratio is set to: ", str(lightning.division_ratio))
 
 # Here you can set a value of 0-120, which increases the capacitance on
 # the RLC circuit in steps of 8pF, up to 120pF. The change in frequency is
@@ -69,7 +68,7 @@ print ('Division Ratio is set to: ', str(lightning.division_ratio))
 # lightning.tune_cap = 0
 
 # When reading the internal capcitor value, it will return the value in pF.
-print('Internal Capacitor is set to: ' + str(lightning.tune_cap))
+print("Internal Capacitor is set to: " + str(lightning.tune_cap))
 
 # This will tell the AS3935 to display the resonance frequncy as a digital
 # signal on the interrupt pin. There are two other internal oscillators

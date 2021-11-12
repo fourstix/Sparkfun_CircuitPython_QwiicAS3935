@@ -59,6 +59,3 @@ setup(
     # simple. Or you can use find_packages().
     py_modules=["sparkfun_qwiicas3935"],
 )
-
-[tool.black]
-target-version = ['py35']
