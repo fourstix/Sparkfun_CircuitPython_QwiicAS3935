@@ -16,13 +16,13 @@
  This program uses the Qwiic AS3935 CircuitPython Library to check
  that status of the Qwiic AS3935 Lightning Detector.
 """
-
+import sys
 import board
-import busio
 import sparkfun_qwiicas3935
 
 # Create bus object using our board's I2C port
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = board.I2C()
+
 # Create an as3935 library object
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
 
@@ -33,17 +33,17 @@ lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
 
 # Check if connected
 if lightning.connected:
-    print('AS3935 Lightning Detector connected.')
+    print("AS3935 Lightning Detector connected.")
 else:
-    print('Lightning Detector does not appear to be connected. Please check wiring.')
-    exit()
+    print("Lightning Detector does not appear to be connected. Please check wiring.")
+    sys.exit()
 
 # Read the Lightning Detector AFE mode and print it out.
 mode = lightning.indoor_outdoor
 
 if mode == lightning.OUTDOOR:
-    print('The Lightning Detector is in the Outdoor mode.')
+    print("The Lightning Detector is in the Outdoor mode.")
 elif mode == lightning.INDOOR:
-    print('The Lightning Detector is in the Indoor mode.')
+    print("The Lightning Detector is in the Indoor mode.")
 else:
-    print('The Lightning Detector is in an Unknown mode.')
+    print("The Lightning Detector is in an Unknown mode.")

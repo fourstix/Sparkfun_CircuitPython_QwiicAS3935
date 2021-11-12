@@ -25,7 +25,7 @@
  GPIO D21 on the Raspberry Pi.  The interrupt pin will go high when an
  event occurs.
 """
-
+import sys
 from time import sleep
 import board
 import busio
@@ -46,14 +46,14 @@ cs.direction = digitalio.Direction.OUTPUT
 
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
 
-print('AS3935 Franklin Lightning Detector')
+print("AS3935 Franklin Lightning Detector")
 
 # Check if connected
 if lightning.connected:
-    print('Schmow-ZoW, Lightning Detector Ready!')
+    print("Schmow-ZoW, Lightning Detector Ready!")
 else:
-    print('Lightning Detector does not appear to be connected. Please check wiring.')
-    exit()
+    print("Lightning Detector does not appear to be connected. Please check wiring.")
+    sys.exit()
 
 # You can reset all the lightning detector settings back to their default values
 # by uncommenting the line below.
@@ -67,11 +67,11 @@ lightning.indoor_outdoor = lightning.OUTDOOR
 afe_mode = lightning.indoor_outdoor
 
 if afe_mode == lightning.OUTDOOR:
-    print('The Lightning Detector is in the Outdoor mode.')
+    print("The Lightning Detector is in the Outdoor mode.")
 elif afe_mode == lightning.INDOOR:
-    print('The Lightning Detector is in the Indoor mode.')
+    print("The Lightning Detector is in the Indoor mode.")
 else:
-    print('The Lightning Detector is in an Unknown mode.')
+    print("The Lightning Detector is in an Unknown mode.")
 
 # Disturbers are events that are false lightning events. If you see a lot
 # of disturbers you can enable the disturber mask to have the chip not report
@@ -79,24 +79,24 @@ else:
 # Uncomment one of the lines below to turn on disturber mask on or off
 # lightning.mask_disturber = True
 # lightning.mask_disturber = False
-print('Are disturbers being masked?', end = ' ')
+print("Are disturbers being masked?", end=" ")
 if lightning.mask_disturber:
-    print('Yes.')
+    print("Yes.")
 else:
-    print('No.')
+    print("No.")
 
 
 # The Noise floor setting from 1-7, one being the lowest.
 # The default setting is two.
 # If you need to change the setting, uncomment the line below
 # lightning.noise_level = 2
-print('Noise level is set at: ' + str(lightning.noise_level))
+print("Noise level is set at: " + str(lightning.noise_level))
 
 # Watchdog threshold setting can be from 1-10, one being the lowest.
 # The default setting is two.
 # If you need to change the setting, uncomment the line below
 # lightning.watchdog_threshold = 2
-print('Watchdog Threshold is set to: ' + str(lightning.watchdog_threshold))
+print("Watchdog Threshold is set to: " + str(lightning.watchdog_threshold))
 
 # Spike Rejection setting from 1-11, one being the lowest.
 # The default setting is two. The shape of the spike is analyzed
@@ -104,7 +104,7 @@ print('Watchdog Threshold is set to: ' + str(lightning.watchdog_threshold))
 # at the cost of sensitivity to distant events.
 # If you need to change the setting, uncomment the line below.
 # lightning.spike_rejection = 2
-print('Spike Rejection is set to: ' + str(lightning.spike_rejection))
+print("Spike Rejection is set to: " + str(lightning.spike_rejection))
 
 
 # This setting will change when the lightning detector issues an interrupt.
@@ -112,8 +112,10 @@ print('Spike Rejection is set to: ' + str(lightning.spike_rejection))
 # instead of one. The default is one, and it takes settings of 1, 5, 9 and 16.
 # If you want to change this value, uncomment the line below.
 # lightning.lightning_threshold = 1
-print('The number of strikes before interrupt is triggered: ' +
-      str(lightning.lightning_threshold))
+print(
+    "The number of strikes before interrupt is triggered: "
+    + str(lightning.lightning_threshold)
+)
 
 # When the distance to the storm is estimated, it takes into account other
 # lightning that was sensed in the past 15 minutes.
@@ -135,25 +137,25 @@ print('The number of strikes before interrupt is triggered: ' +
 #    print('Error recalibrating internal osciallator on wake up.')
 
 
-print('Type Ctrl-C to exit program.')
+print("Type Ctrl-C to exit program.")
 
 try:
     while True:
         # When the interrupt goes high
         if as3935_interrupt_pin.value:
-            print('Interrupt:', end=' ')
+            print("Interrupt:", end=" ")
             interrupt_value = lightning.read_interrupt_register()
 
             if interrupt_value == lightning.NOISE:
-                print('Noise.')
+                print("Noise.")
             elif interrupt_value == lightning.DISTURBER:
-                print('Disturber.')
+                print("Disturber.")
             elif interrupt_value == lightning.LIGHTNING:
-                print('Lightning strike detected!')
+                print("Lightning strike detected!")
                 # Distance estimation takes into account previous events.
-                print('Approximately: ' + str(lightning.distance_to_storm) + 'km away!')
+                print("Approximately: " + str(lightning.distance_to_storm) + "km away!")
                 # Energy is a pure number with no physical meaning.
-                print('Energy: ' + str(lightning.lightning_energy))
+                print("Energy: " + str(lightning.lightning_energy))
         sleep(1)
 
 except KeyboardInterrupt:
