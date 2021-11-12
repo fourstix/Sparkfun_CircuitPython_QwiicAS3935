@@ -553,7 +553,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             raise ValueError("Register value must be in the range of 0x00 to 0x08")
 
         with self._i2c as i2c:
-            i2c.write(bytes([0x00]), stop=False)
+            i2c.write(bytes([0x00]))
             # Write to the base address, then read all data registers in a
             # single block read. Then return the desired value from the list.
             # Successive individual byte reads, tend to fail. This trick
@@ -575,7 +575,7 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
         # contains the lightning look-up tables and calibration registers.
         # The read_register is more efficent for more frequent data registers.
         with self._i2c as i2c:
-            i2c.write(bytes([0x00]), stop=False)
+            i2c.write(bytes([0x00]))
             # Write to the base address, then read all data registers in a
             # single block read. Then return the desired value from the list.
             # Successive individual byte reads, tend to fail. This trick
