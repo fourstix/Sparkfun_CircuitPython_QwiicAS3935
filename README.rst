@@ -1,7 +1,7 @@
 Introduction
 ============
 .. image:: https://readthedocs.org/projects/sparkfun-circuitpython-qwiicas3935/badge/?version=latest
-    :target: https://circuitpython-qwiicas3935.readthedocs.io/
+    :target: https://sparkfun-circuitpython-qwiicas3935.readthedocs.io/en/latest/
     :alt: Documentation Status
 
 
