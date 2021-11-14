@@ -143,23 +143,22 @@ Usage Example
 
 * Code Example:
 
- .. code-block:: shell
+.. code-block:: shell
 
-    # import the CircuitPython board and busio libraries
-    import board
-    import busio
-    import sparkfun_qwiicas3935
+   # import the CircuitPython board and busio libraries
+   import board
+   import sparkfun_qwiicas3935
 
-    # Create bus object using the board's I2C port
-    i2c = busio.I2C(board.SCL, board.SDA)
+   # Create bus object using the board's I2C port
+   i2c = board.I2C()
 
-    as3935 = QwiicAS3935_I2C(i2c)  # default address is 0x03
+   as3935 = QwiicAS3935_I2C(i2c)  # default address is 0x03
 
-    # OR create a library object using the board's SPI port
-    # spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-    # cs = digitalio.DigitalInOut(board.CE0)
-    # cs.direction = digitalio.Direction.OUTPUT
-    # as3935 = QwiicAS3935_SPI(spi, cs)
+   # OR create a library object using the board's SPI port
+   # spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
+   # cs = digitalio.DigitalInOut(board.CE0)
+   # cs.direction = digitalio.Direction.OUTPUT
+   # as3935 = QwiicAS3935_SPI(spi, cs)
 
 Contributing
 ============
