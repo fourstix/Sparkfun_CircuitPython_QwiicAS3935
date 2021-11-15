@@ -160,6 +160,23 @@ Usage Example
    # cs.direction = digitalio.Direction.OUTPUT
    # as3935 = QwiicAS3935_SPI(spi, cs)
 
+Upgrading
+=========
+On supported GNU/Linux systems like the Raspberry Pi, you can upgrade the driver
+to the latest published version.
+
+To upgrade for current user:
+
+.. code-block:: shell
+
+    pip3 install --upgrade sparkfun-circuitpython-qwiicjoystick
+
+To upgrade system-wide (this may be required in some cases):
+
+.. code-block:: shell
+
+    sudo pip3 install --upgrade sparkfun-circuitpython-qwiicjoystick
+
 Contributing
 ============
 
