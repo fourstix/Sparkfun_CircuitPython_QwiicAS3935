@@ -17,6 +17,9 @@
  that status of the Qwiic AS3935 Lightning Detector.
 """
 import sys
+
+# import busio
+# import digitalio
 import board
 import sparkfun_qwiicas3935
 
@@ -27,8 +30,11 @@ i2c = board.I2C()
 lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_I2C(i2c)
 
 # OR create a library object using the Bus SPI port
+# CS can be any available GPIO pin
+
 # spi = busio.SPI(board.SCK, board.MOSI, board.MISO)
-# cs = digitalio.DigitalInOut(board.D8)
+# cs = digitalio.DigitalInOut(board.D20)
+# cs.direction = digitalio.Direction.OUTPUT
 # lightning = sparkfun_qwiicas3935.Sparkfun_QwiicAS3935_SPI(spi, cs)
 
 # Check if connected
