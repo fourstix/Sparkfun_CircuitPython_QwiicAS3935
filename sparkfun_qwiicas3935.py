@@ -598,8 +598,12 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             # In the original commments, Phil Fenstermacher (pcfens) says this
             # trick is required because smbus doesn't support repeated I2C
             # starts to read the registers directly (singularly) on the sensor.
+            i2c.write(bytes([0x00]))
             result = bytearray(9)
-            i2c.write_then_readinto(bytes([0x00]), result)
+            # write_then_readinto() does not work reliably,
+            # so do explicit write followed by read into
+            # i2c.write_then_readinto(bytes([0x00]), result)
+            i2c.readinto(result)
             if self._debug:
                 print([hex(i) for i in result])
                 print("$%02X => %s" % (register, hex(result[register])))
@@ -621,8 +625,12 @@ class Sparkfun_QwiicAS3935_I2C(Sparkfun_QwiicAS3935):
             # In the original commments, Phil Fenstermacher (pcfens) says this
             # trick is required because smbus doesn't support repeated I2C
             # starts to read the registers directly (singularly) on the sensor.
+            i2c.write(bytes([0x00]))
             result = bytearray(0x3E)
-            i2c.write_then_readinto(bytes([0x00]), result)
+            # write_then_readinto() does not work reliably,
+            # so do explicit write followed by read into
+            # i2c.write_then_readinto(bytes([0x00]), result)
+            i2c.readinto(result)
             if self._debug:
                 print([hex(i) for i in result])
                 print("$%02X => %s" % (register, hex(result[register])))
